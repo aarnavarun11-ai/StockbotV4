@@ -1,0 +1,167 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  #app { display: flex; flex-direction: column; height: 580px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); overflow: hidden; background: var(--color-background-primary); }
+  #header { padding: 14px 18px; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; align-items: center; gap: 10px; background: var(--color-background-secondary); }
+  #header .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+  #header h2 { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  #header span { font-size: 12px; color: var(--color-text-secondary); margin-left: auto; }
+  #chips { display: flex; gap: 6px; padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); overflow-x: auto; flex-shrink: 0; background: var(--color-background-primary); }
+  #chips::-webkit-scrollbar { display: none; }
+  .chip { font-size: 12px; padding: 5px 11px; border-radius: 99px; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; background: var(--color-background-primary); transition: all 0.15s; flex-shrink: 0; }
+  .chip:hover { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+  #messages { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; }
+  #messages::-webkit-scrollbar { width: 4px; }
+  #messages::-webkit-scrollbar-thumb { background: var(--color-border-tertiary); border-radius: 4px; }
+  .msg { display: flex; flex-direction: column; max-width: 85%; }
+  .msg.user { align-self: flex-end; align-items: flex-end; }
+  .msg.bot { align-self: flex-start; align-items: flex-start; }
+  .bubble { padding: 10px 13px; border-radius: 14px; font-size: 14px; line-height: 1.6; }
+  .msg.user .bubble { background: #1a56db; color: #fff; border-bottom-right-radius: 4px; }
+  .msg.bot .bubble { background: var(--color-background-secondary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-tertiary); border-bottom-left-radius: 4px; }
+  .msg-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 3px; }
+  .typing { display: flex; align-items: center; gap: 4px; padding: 10px 14px; }
+  .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-tertiary); animation: bounce 1s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.15s; }
+  .typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+  .signal { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 3px 9px; border-radius: 99px; margin-top: 6px; }
+  .signal.buy { background: #dcfce7; color: #15803d; }
+  .signal.sell { background: #fee2e2; color: #b91c1c; }
+  .signal.hold { background: #fef9c3; color: #854d0e; }
+  #input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 0.5px solid var(--color-border-tertiary); background: var(--color-background-primary); }
+  #input-row input { flex: 1; padding: 9px 13px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); font-size: 14px; background: var(--color-background-primary); color: var(--color-text-primary); outline: none; }
+  #input-row input:focus { border-color: #1a56db; }
+  #send-btn { padding: 9px 16px; background: #1a56db; color: #fff; border: none; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer; font-weight: 500; transition: opacity 0.15s; }
+  #send-btn:hover { opacity: 0.88; }
+  #send-btn:disabled { opacity: 0.4; cursor: default; }
+  .disclaimer { font-size: 11px; color: var(--color-text-tertiary); text-align: center; padding: 4px 14px 10px; }
+</style>
+<h2 class="sr-only">AI stock analysis chatbot powered by Claude</h2>
+<div id="app">
+  <div id="header">
+    <div class="dot"></div>
+    <h2>StockAI Advisor</h2>
+    <span>Powered by Claude</span>
+  </div>
+  <div id="chips">
+    <div class="chip" onclick="sendChip(this.textContent)">Should I buy NVDA?</div>
+    <div class="chip" onclick="sendChip(this.textContent)">Is AAPL a good investment?</div>
+    <div class="chip" onclick="sendChip(this.textContent)">Compare TSLA vs F</div>
+    <div class="chip" onclick="sendChip(this.textContent)">Top AI stocks 2025</div>
+    <div class="chip" onclick="sendChip(this.textContent)">Best dividend stocks</div>
+    <div class="chip" onclick="sendChip(this.textContent)">Predict MSFT next quarter</div>
+  </div>
+  <div id="messages">
+    <div class="msg bot">
+      <div class="msg-label">StockAI</div>
+      <div class="bubble">Hello! I'm your AI stock analyst. Ask me about any stock — I can give buy/sell/hold signals, compare companies, analyze sectors, and predict short-term trends based on fundamentals and market context.<br><br>Try asking about a specific ticker like <strong>NVDA</strong>, <strong>AAPL</strong>, or <strong>TSLA</strong>.</div>
+    </div>
+  </div>
+  <div id="input-row">
+    <input id="user-input" type="text" placeholder="Ask about any stock..." onkeydown="if(event.key==='Enter') sendMessage()" />
+    <button id="send-btn" onclick="sendMessage()"><i class="ti ti-send" aria-hidden="true"></i></button>
+  </div>
+  <div class="disclaimer">⚠️ For educational purposes only — not financial advice. Always consult a qualified advisor.</div>
+</div>
+<script>
+const history = [];
+const SYSTEM = `You are StockAI, a sharp, confident stock market analyst assistant. You help users understand stocks, predict price movements, and give clear BUY / SELL / HOLD recommendations.
+
+Rules:
+- Always give a BUY, SELL, or HOLD signal at the end of any stock analysis, on its own line in this format: SIGNAL: BUY or SIGNAL: SELL or SIGNAL: HOLD
+- Be concise but insightful — 3-5 sentences max per response
+- Reference relevant financial metrics, sector trends, macro factors when applicable
+- Acknowledge uncertainty honestly — markets are unpredictable
+- When comparing stocks, give a clear winner
+- Always end with a brief risk note
+- You have knowledge up to early 2025. Be transparent about this.
+- Do not give personalized financial advice — frame as educational analysis`;
+
+async function callClaude(userMsg) {
+  history.push({ role: "user", content: userMsg });
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1000,
+      system: SYSTEM,
+      messages: history
+    })
+  });
+  const data = await res.json();
+  const text = data.content?.map(b => b.text || "").join("") || "Sorry, I couldn't fetch a response.";
+  history.push({ role: "assistant", content: text });
+  return text;
+}
+
+function extractSignal(text) {
+  const m = text.match(/SIGNAL:\s*(BUY|SELL|HOLD)/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+function formatBubble(text) {
+  const signal = extractSignal(text);
+  const cleaned = text.replace(/SIGNAL:\s*(BUY|SELL|HOLD)/gi, "").trim();
+  let html = cleaned.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
+  if (signal) {
+    const cls = signal.toLowerCase();
+    const icons = { BUY: "📈", SELL: "📉", HOLD: "⏸" };
+    html += `<br><span class="signal ${cls}">${icons[signal]} ${signal}</span>`;
+  }
+  return html;
+}
+
+function addMsg(role, html, isHTML = false) {
+  const msgs = document.getElementById("messages");
+  const d = document.createElement("div");
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-label">${role === "user" ? "You" : "StockAI"}</div><div class="bubble">${isHTML ? html : html.replace(/</g,"&lt;")}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+  return d;
+}
+
+function showTyping() {
+  const msgs = document.getElementById("messages");
+  const d = document.createElement("div");
+  d.className = "msg bot";
+  d.id = "typing-indicator";
+  d.innerHTML = `<div class="msg-label">StockAI</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById("typing-indicator");
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById("user-input");
+  const btn = document.getElementById("send-btn");
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = "";
+  btn.disabled = true;
+  addMsg("user", text);
+  showTyping();
+  try {
+    const reply = await callClaude(text);
+    removeTyping();
+    addMsg("bot", formatBubble(reply), true);
+  } catch(e) {
+    removeTyping();
+    addMsg("bot", "Connection error. Please try again.", true);
+  }
+  btn.disabled = false;
+  input.focus();
+}
+
+function sendChip(text) {
+  document.getElementById("user-input").value = text;
+  sendMessage();
+}
+</script>
