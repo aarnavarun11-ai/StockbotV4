@@ -1,211 +1,755 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>StockAI Advisor</title>
-    <style>
-      :root {
-        --color-background-primary: #ffffff;
-        --color-background-secondary: #f9fafb;
-        --color-border-primary: #d1d5db;
-        --color-border-secondary: #e5e7eb;
-        --color-border-tertiary: #f3f4f6;
-        --color-text-primary: #111827;
-        --color-text-secondary: #4b5563;
-        --color-text-tertiary: #9ca3af;
-        --border-radius-md: 8px;
-        --border-radius-lg: 12px;
-        --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-      }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockAI Advisor — Contrarian Analysis Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e14;
+  --bg2: #0f1520;
+  --bg3: #151d2e;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --accent: #3b82f6;
+  --green: #10b981;
+  --red: #ef4444;
+  --amber: #f59e0b;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
-      body { font-family: var(--font-sans); background: #f3f4f6; padding: 20px; display: flex; justify-content: center; }
-      
-      #app { 
-        width: 100%;
-        max-width: 500px;
-        display: flex; 
-        flex-direction: column; 
-        height: 600px; 
-        border: 0.5px solid var(--color-border-primary); 
-        border-radius: var(--border-radius-lg); 
-        overflow: hidden; 
-        background: var(--color-background-primary); 
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-      }
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+}
 
-      #header { padding: 14px 18px; border-bottom: 0.5px solid var(--color-border-secondary); display: flex; align-items: center; gap: 10px; background: var(--color-background-secondary); }
-      #header .dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
-      #header h2 { font-size: 15px; font-weight: 600; color: var(--color-text-primary); }
-      #header span { font-size: 12px; color: var(--color-text-secondary); margin-left: auto; }
+/* Ambient grid background */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
 
-      #chips { display: flex; gap: 6px; padding: 10px 14px; border-bottom: 0.5px solid var(--color-border-tertiary); overflow-x: auto; flex-shrink: 0; background: var(--color-background-primary); }
-      #chips::-webkit-scrollbar { display: none; }
-      .chip { font-size: 12px; padding: 6px 12px; border-radius: 99px; border: 0.5px solid var(--color-border-secondary); color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
-      .chip:hover { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); }
+#app {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 32px);
+  max-height: 780px;
+  border: 1px solid var(--border2);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg2);
+  position: relative;
+}
 
-      #messages { flex: 1; overflow-y: auto; padding: 16px 14px; display: flex; flex-direction: column; gap: 12px; background: #fff; }
-      .msg { display: flex; flex-direction: column; max-width: 85%; }
-      .msg.user { align-self: flex-end; align-items: flex-end; }
-      .msg.bot { align-self: flex-start; align-items: flex-start; }
-      .bubble { padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
-      .msg.user .bubble { background: #1a56db; color: #fff; border-bottom-right-radius: 4px; }
-      .msg.bot .bubble { background: var(--color-background-secondary); color: var(--color-text-primary); border: 0.5px solid var(--color-border-secondary); border-bottom-left-radius: 4px; }
-      .msg-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 4px; font-weight: 500; }
+/* ── HEADER ── */
+#header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+.logo-mark {
+  width: 28px; height: 28px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+}
+#header h2 { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+#header .sub { font-size: 11px; color: var(--muted); font-family: var(--mono); }
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  margin-left: auto;
+  box-shadow: 0 0 6px var(--green);
+  animation: pulse-dot 2s infinite;
+}
+@keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-      .signal { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 99px; margin-top: 8px; text-transform: uppercase; }
-      .signal.buy { background: #dcfce7; color: #15803d; }
-      .signal.sell { background: #fee2e2; color: #b91c1c; }
-      .signal.hold { background: #fef9c3; color: #854d0e; }
+/* ── MODE TOGGLE ── */
+#mode-bar {
+  display: flex;
+  gap: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  flex-shrink: 0;
+}
+.mode-btn {
+  flex: 1;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .15s;
+  text-align: center;
+}
+.mode-btn:first-child { border-radius: 6px 0 0 6px; }
+.mode-btn:last-child  { border-radius: 0 6px 6px 0; }
+.mode-btn:not(:first-child) { border-left: none; }
+.mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-      .typing { display: flex; gap: 4px; padding: 10px 0; }
-      .typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--color-text-tertiary); animation: bounce 1.4s infinite ease-in-out; }
-      .typing span:nth-child(2) { animation-delay: 0.2s; }
-      .typing span:nth-child(3) { animation-delay: 0.4s; }
-      @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+/* ── CHIPS ── */
+#chips {
+  display: flex; gap: 6px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto; flex-shrink: 0;
+}
+#chips::-webkit-scrollbar { display: none; }
+.chip {
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 5px 10px;
+  border-radius: 99px;
+  border: 1px solid var(--border2);
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+}
+.chip:hover { background: var(--bg3); color: var(--text); border-color: var(--accent); }
 
-      #input-row { display: flex; gap: 8px; padding: 12px 14px; border-top: 0.5px solid var(--color-border-secondary); background: #fff; }
-      #input-row input { flex: 1; padding: 10px 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-primary); font-size: 14px; outline: none; }
-      #input-row input:focus { border-color: #1a56db; ring: 2px solid #1a56db; }
-      #send-btn { padding: 0 16px; background: #1a56db; color: #fff; border: none; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer; font-weight: 600; }
-      #send-btn:disabled { opacity: 0.5; }
+/* ── MESSAGES ── */
+#messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scroll-behavior: smooth;
+}
+#messages::-webkit-scrollbar { width: 3px; }
+#messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 
-      .disclaimer { font-size: 10px; color: var(--color-text-tertiary); text-align: center; padding: 8px 14px; background: #fff; border-bottom-left-radius: var(--border-radius-lg); border-bottom-right-radius: var(--border-radius-lg); }
-    </style>
+.msg { display: flex; flex-direction: column; max-width: 90%; }
+.msg.user { align-self: flex-end; align-items: flex-end; }
+.msg.bot  { align-self: flex-start; align-items: flex-start; }
+
+.msg-label {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--muted);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.bubble {
+  padding: 10px 13px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.msg.user .bubble {
+  background: var(--accent);
+  color: #fff;
+  border-bottom-right-radius: 3px;
+  font-weight: 400;
+}
+.msg.bot .bubble {
+  background: var(--bg3);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  border-bottom-left-radius: 3px;
+}
+
+/* ── ANALYSIS CARD ── */
+.analysis-card {
+  margin-top: 8px;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  overflow: hidden;
+  font-size: 12px;
+  width: 100%;
+}
+.card-section {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+}
+.card-section:last-child { border-bottom: none; }
+.card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+
+/* Confidence bar */
+.conf-bar-wrap {
+  display: flex; align-items: center; gap: 8px;
+}
+.conf-bar-track {
+  flex: 1; height: 5px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.conf-bar-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
+.conf-val {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Bull/Bear split */
+.bb-row { display: flex; gap: 6px; margin-top: 4px; }
+.bb-pill {
+  flex: 1; padding: 5px 8px;
+  border-radius: 7px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.bb-pill.bull { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2); color: #6ee7b7; }
+.bb-pill.bear { background: rgba(239,68,68,.08);  border: 1px solid rgba(239,68,68,.2);  color: #fca5a5; }
+.bb-pill-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 3px;
+}
+
+/* Contrarian flag */
+.contrarian-flag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(245,158,11,.1);
+  border: 1px solid rgba(245,158,11,.25);
+  color: #fcd34d;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+/* Signal */
+.signal {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 99px;
+  margin-top: 8px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.signal.buy  { background: rgba(16,185,129,.15);  color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+.signal.sell { background: rgba(239,68,68,.15);   color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+.signal.hold { background: rgba(245,158,11,.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+
+/* Metrics row */
+.metrics-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 6px; margin-top: 4px;
+}
+.metric-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  text-align: center;
+}
+.metric-val {
+  font-family: var(--mono);
+  font-size: 13px; font-weight: 600;
+  color: var(--text);
+  display: block;
+}
+.metric-lbl {
+  font-size: 10px; color: var(--muted);
+  margin-top: 2px;
+}
+
+/* Typing */
+.typing { display: flex; gap: 5px; padding: 8px 0; align-items: center; }
+.typing span {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--muted);
+  animation: blink 1.2s infinite ease-in-out;
+}
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+
+/* ── INPUT ── */
+#input-row {
+  display: flex; gap: 8px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg3);
+  flex-shrink: 0;
+}
+#user-input {
+  flex: 1;
+  padding: 9px 13px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  outline: none;
+  transition: border-color .15s;
+}
+#user-input::placeholder { color: var(--muted); }
+#user-input:focus { border-color: var(--accent); }
+#send-btn {
+  padding: 0 16px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .04em;
+  transition: opacity .15s, transform .1s;
+}
+#send-btn:hover { opacity: .9; }
+#send-btn:active { transform: scale(.97); }
+#send-btn:disabled { opacity: .35; cursor: default; }
+
+.disclaimer {
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--muted);
+  text-align: center;
+  padding: 7px 14px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  letter-spacing: .02em;
+}
+
+/* Debate mode panel */
+.debate-panel {
+  padding: 10px 12px;
+  background: var(--bg);
+  border-top: 1px solid var(--border2);
+  font-size: 12px;
+}
+.debate-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+}
+.debate-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.debate-side {
+  padding: 8px;
+  border-radius: 7px;
+  line-height: 1.5;
+  font-size: 12px;
+}
+.debate-side.bull { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.15); color: #a7f3d0; }
+.debate-side.bear { background: rgba(239,68,68,.06);  border: 1px solid rgba(239,68,68,.15);  color: #fecaca; }
+.debate-side-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 4px;
+  display: block;
+}
+</style>
 </head>
 <body>
-
 <div id="app">
+
+  <!-- Header -->
   <div id="header">
-    <div class="dot"></div>
-    <h2>StockAI Advisor</h2>
-    <span>Live Analysis</span>
+    <div class="logo-mark">AI</div>
+    <div>
+      <h2>StockAI Advisor</h2>
+      <div class="sub">Contrarian Analysis Engine v2.0</div>
+    </div>
+    <div class="live-dot" title="Live"></div>
   </div>
+
+  <!-- Mode bar -->
+  <div id="mode-bar">
+    <button class="mode-btn active" onclick="setMode('standard')"    id="btn-standard">Standard</button>
+    <button class="mode-btn"        onclick="setMode('contrarian')"  id="btn-contrarian">Contrarian</button>
+    <button class="mode-btn"        onclick="setMode('debate')"      id="btn-debate">Bull/Bear Debate</button>
+  </div>
+
+  <!-- Quick chips -->
   <div id="chips">
-    <div class="chip" onclick="sendChip('Should I buy NVDA?')">Should I buy NVDA?</div>
-    <div class="chip" onclick="sendChip('Is AAPL a good investment?')">Is AAPL a good investment?</div>
-    <div class="chip" onclick="sendChip('Compare TSLA vs F')">TSLA vs Ford</div>
-    <div class="chip" onclick="sendChip('Top AI stocks 2025')">AI Stocks 2025</div>
+    <div class="chip" onclick="sendChip('Analyze NVDA')">NVDA</div>
+    <div class="chip" onclick="sendChip('Analyze AAPL')">AAPL</div>
+    <div class="chip" onclick="sendChip('Analyze TSLA')">TSLA</div>
+    <div class="chip" onclick="sendChip('Analyze MSFT')">MSFT</div>
+    <div class="chip" onclick="sendChip('Analyze SPY')">SPY</div>
+    <div class="chip" onclick="sendChip('Top AI stocks right now')">AI Stocks</div>
   </div>
+
+  <!-- Messages -->
   <div id="messages">
     <div class="msg bot">
-      <div class="msg-label">StockAI</div>
-      <div class="bubble">Hello! I'm your AI stock analyst. I provide technical and fundamental insights. Ask me about any ticker.<br><br><strong>Example:</strong> "Analyze MSFT"</div>
+      <div class="msg-label">StockAI v2</div>
+      <div class="bubble">
+        Welcome to the Contrarian Analysis Engine. I use statistical reasoning to challenge assumptions and provide balanced views — even when they disagree with yours.<br><br>
+        Try the <strong>Contrarian</strong> or <strong>Bull/Bear Debate</strong> modes above, then ask about any ticker.
+      </div>
     </div>
   </div>
+
+  <!-- Input -->
   <div id="input-row">
-    <input id="user-input" type="text" placeholder="Type ticker or question..." onkeydown="if(event.key==='Enter') sendMessage()" />
-    <button id="send-btn" onclick="sendMessage()">Send</button>
+    <input id="user-input" type="text" placeholder="Enter ticker or market opinion..." onkeydown="if(event.key==='Enter')sendMessage()" />
+    <button id="send-btn" onclick="sendMessage()">SEND</button>
   </div>
-  <div class="disclaimer">⚠️ For educational purposes only. Not financial advice.</div>
+
+  <div class="disclaimer">⚠ Educational only — not financial advice. Past performance ≠ future results.</div>
 </div>
 
 <script>
-const history = [];
 const API_KEY = "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";
-const SYSTEM_PROMPT = `You are StockAI, a sharp stock market analyst. 
+const history = [];
+let mode = 'standard';
+
+/* ── SYSTEM PROMPTS ── */
+const PROMPTS = {
+  standard: `You are StockAI, a precise quantitative stock analyst with expertise in fundamental and technical analysis.
+
+For every response, output EXACTLY this JSON structure (no markdown, no extra text, just raw JSON):
+{
+  "analysis": "3-4 sentence analytical summary using specific financial metrics, sector trends, and macro context",
+  "bull_case": "1-2 sentence bullish argument with a specific data point",
+  "bear_case": "1-2 sentence bearish argument with a specific data point",
+  "confidence": <integer 30-90>,
+  "signal": "BUY" | "SELL" | "HOLD",
+  "is_contrarian": false,
+  "metrics": {
+    "sentiment": "Bullish" | "Bearish" | "Neutral",
+    "volatility": "Low" | "Medium" | "High",
+    "timeframe": "Short-term" | "Mid-term" | "Long-term"
+  }
+}`,
+
+  contrarian: `You are StockAI in CONTRARIAN MODE. Your purpose is to challenge consensus views and find overlooked risks or opportunities. You are skeptical of mainstream narratives.
+
 Rules:
-1. Provide a concise analysis (3-5 sentences).
-2. Use financial metrics (P/E, growth, etc.) or market trends.
-3. ALWAYS end with a recommendation in this exact format on a new line: SIGNAL: BUY (or SELL or HOLD).
-4. Do not give personal financial advice.`;
+- If a user says a stock is good, present the statistical case AGAINST it
+- If a user asks about a hot trending stock, highlight mean-reversion risks
+- Always cite what the market is pricing in versus what fundamentals suggest
+- Express genuine uncertainty; markets are complex
+- Never just agree with popular sentiment
 
+Output EXACTLY this JSON structure (raw JSON only, no markdown):
+{
+  "analysis": "3-4 sentence contrarian take that CHALLENGES conventional wisdom, citing specific metrics",
+  "bull_case": "Brief steelman of the bull case you are pushing back against",
+  "bear_case": "Your main contrarian argument with statistical support",
+  "confidence": <integer 35-75>,
+  "signal": "BUY" | "SELL" | "HOLD",
+  "is_contrarian": true,
+  "metrics": {
+    "sentiment": "Bullish" | "Bearish" | "Neutral",
+    "volatility": "Low" | "Medium" | "High",
+    "timeframe": "Short-term" | "Mid-term" | "Long-term"
+  }
+}`,
+
+  debate: `You are StockAI in BULL/BEAR DEBATE MODE. You simultaneously argue both sides of every stock thesis with equal rigor.
+
+Output EXACTLY this JSON structure (raw JSON only):
+{
+  "analysis": "2-sentence neutral framing of the key debate",
+  "bull_case": "3-4 sentence passionate bull argument with specific metrics, catalysts, and price targets",
+  "bear_case": "3-4 sentence passionate bear argument with specific risks, valuation concerns, and downside scenarios",
+  "confidence": <integer 40-60>,
+  "signal": "HOLD",
+  "is_contrarian": false,
+  "metrics": {
+    "sentiment": "Neutral",
+    "volatility": "Medium" | "High",
+    "timeframe": "Mid-term"
+  }
+}`
+};
+
+/* ── GROQ API CALL ── */
 async function callGroq(userMsg) {
-  // Add to local history
-  history.push({ role: "user", content: userMsg });
-  
-  const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        ...history
-      ],
-      temperature: 0.7
-    })
-  });
+  // Detect file:// protocol — fetch is blocked by browsers in this context
+  if (location.protocol === 'file:') {
+    throw new Error('Open this file via a server, not file://. Use VS Code Live Server, or upload to GitHub Pages.');
+  }
 
-  const data = await response.json();
-  if (data.error) throw new Error(data.error.message);
-  
+  history.push({ role: "user", content: userMsg });
+
+  let res;
+  try {
+    res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+          { role: "system", content: PROMPTS[mode] },
+          ...history
+        ],
+        temperature: mode === 'contrarian' ? 0.85 : 0.7,
+        max_tokens: 700
+      })
+    });
+  } catch (networkErr) {
+    throw new Error('Network blocked. If you see this on GitHub Pages, your key may be expired. Get a new one at console.groq.com');
+  }
+
+  const data = await res.json();
+
+  if (data.error) {
+    const msg = data.error.message || JSON.stringify(data.error);
+    if (res.status === 401) throw new Error('Invalid API key. Get a new one at console.groq.com/keys');
+    if (res.status === 429) throw new Error('Rate limit hit. Wait 30 seconds and try again, or upgrade your Groq plan.');
+    throw new Error(msg);
+  }
+
   const text = data.choices[0].message.content;
   history.push({ role: "assistant", content: text });
   return text;
 }
 
-function extractSignal(text) {
-  const m = text.match(/SIGNAL:\s*(BUY|SELL|HOLD)/i);
-  return m ? m[1].toUpperCase() : null;
-}
-
-function formatBubble(text) {
-  const signal = extractSignal(text);
-  const cleaned = text.replace(/SIGNAL:\s*(BUY|SELL|HOLD)/gi, "").trim();
-  let html = cleaned.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\n/g, "<br>");
-  
-  if (signal) {
-    const cls = signal.toLowerCase();
-    const icons = { BUY: "📈", SELL: "📉", HOLD: "⏸" };
-    html += `<br><span class="signal ${cls}">${icons[signal]} ${signal}</span>`;
+/* ── PARSE RESPONSE ── */
+function parseResponse(raw) {
+  try {
+    const cleaned = raw.replace(/```json|```/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch {
+    // Fallback: extract signal manually
+    const sig = raw.match(/SIGNAL:\s*(BUY|SELL|HOLD)/i);
+    return {
+      analysis: raw.replace(/SIGNAL:.*/gi,'').trim(),
+      bull_case: '',
+      bear_case: '',
+      confidence: 55,
+      signal: sig ? sig[1].toUpperCase() : 'HOLD',
+      is_contrarian: false,
+      metrics: { sentiment: 'Neutral', volatility: 'Medium', timeframe: 'Mid-term' }
+    };
   }
-  return html;
 }
 
-function addMsg(role, content, isHTML = false) {
-  const container = document.getElementById("messages");
-  const div = document.createElement("div");
-  div.className = `msg ${role}`;
-  div.innerHTML = `
-    <div class="msg-label">${role === "user" ? "You" : "StockAI"}</div>
-    <div class="bubble">${isHTML ? content : content.replace(/</g,"&lt;")}</div>
-  `;
-  container.appendChild(div);
-  container.scrollTop = container.scrollHeight;
+/* ── BUILD CARD HTML ── */
+function buildCard(d) {
+  const sigClass = (d.signal || 'HOLD').toLowerCase();
+  const sigIcons = { BUY: '▲', SELL: '▼', HOLD: '◆' };
+  const sig = d.signal || 'HOLD';
+
+  const confColor =
+    d.confidence >= 70 ? '#10b981' :
+    d.confidence >= 50 ? '#f59e0b' : '#ef4444';
+
+  const sentColor =
+    d.metrics?.sentiment === 'Bullish' ? '#34d399' :
+    d.metrics?.sentiment === 'Bearish' ? '#f87171' : '#94a3b8';
+
+  const contrFlag = d.is_contrarian
+    ? `<div class="contrarian-flag">⚡ Contrarian View — challenges consensus</div>` : '';
+
+  const debateSection = (mode === 'debate' && d.bull_case && d.bear_case)
+    ? `<div class="card-section">
+        <div class="card-label">Bull vs Bear Debate</div>
+        <div class="debate-row">
+          <div class="debate-side bull">
+            <span class="debate-side-label">▲ Bull Case</span>
+            ${escHtml(d.bull_case)}
+          </div>
+          <div class="debate-side bear">
+            <span class="debate-side-label">▼ Bear Case</span>
+            ${escHtml(d.bear_case)}
+          </div>
+        </div>
+      </div>`
+    : (d.bull_case || d.bear_case)
+    ? `<div class="card-section">
+        <div class="bb-row">
+          ${d.bull_case ? `<div class="bb-pill bull"><div class="bb-pill-label">▲ Bull</div>${escHtml(d.bull_case)}</div>` : ''}
+          ${d.bear_case ? `<div class="bb-pill bear"><div class="bb-pill-label">▼ Bear</div>${escHtml(d.bear_case)}</div>` : ''}
+        </div>
+      </div>` : '';
+
+  return `
+    <div class="analysis-card">
+      <div class="card-section">
+        ${contrFlag}
+        <div class="card-label">Analysis</div>
+        <div style="color:var(--text);line-height:1.6;font-size:12.5px">${escHtml(d.analysis)}</div>
+        <span class="signal ${sigClass}">${sigIcons[sig] || '◆'} ${sig}</span>
+      </div>
+      ${debateSection}
+      <div class="card-section">
+        <div class="card-label">Confidence Level</div>
+        <div class="conf-bar-wrap">
+          <div class="conf-bar-track">
+            <div class="conf-bar-fill" style="width:${d.confidence}%;background:${confColor}"></div>
+          </div>
+          <div class="conf-val" style="color:${confColor}">${d.confidence}%</div>
+        </div>
+      </div>
+      <div class="card-section">
+        <div class="card-label">Statistical Snapshot</div>
+        <div class="metrics-grid">
+          <div class="metric-box">
+            <span class="metric-val" style="color:${sentColor}">${d.metrics?.sentiment || 'N/A'}</span>
+            <div class="metric-lbl">Sentiment</div>
+          </div>
+          <div class="metric-box">
+            <span class="metric-val">${d.metrics?.volatility || 'N/A'}</span>
+            <div class="metric-lbl">Volatility</div>
+          </div>
+          <div class="metric-box">
+            <span class="metric-val" style="font-size:10px">${d.metrics?.timeframe || 'N/A'}</span>
+            <div class="metric-lbl">Timeframe</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
 }
 
+function escHtml(str) {
+  return String(str || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+/* ── DOM HELPERS ── */
+function addMsg(role, htmlContent) {
+  const wrap = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
+  d.innerHTML = `<div class="msg-label">${role==='user'?'You':'StockAI v2'}</div>
+                 <div class="bubble">${htmlContent}</div>`;
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+  return d;
+}
+
+function addBotCard(bubbleHtml, cardHtml) {
+  const wrap = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg bot';
+  d.style.maxWidth = '100%';
+  d.innerHTML = `<div class="msg-label">StockAI v2</div>
+                 <div class="bubble">${bubbleHtml}</div>
+                 ${cardHtml}`;
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function showTyping() {
+  const wrap = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.id = 'typing-ind';
+  d.className = 'msg bot';
+  d.innerHTML = `<div class="msg-label">StockAI v2</div>
+    <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-ind');
+  if (t) t.remove();
+}
+
+/* ── SEND ── */
 async function sendMessage() {
-  const input = document.getElementById("user-input");
-  const btn = document.getElementById("send-btn");
-  const text = input.value.trim();
-  
+  const input = document.getElementById('user-input');
+  const btn   = document.getElementById('send-btn');
+  const text  = input.value.trim();
   if (!text) return;
-  
-  input.value = "";
+
+  input.value = '';
   btn.disabled = true;
-  addMsg("user", text);
-  
-  // Show typing indicator
-  const typingId = "typing-" + Date.now();
-  const container = document.getElementById("messages");
-  const tDiv = document.createElement("div");
-  tDiv.id = typingId;
-  tDiv.className = "msg bot";
-  tDiv.innerHTML = `<div class="msg-label">StockAI</div><div class="bubble typing"><span></span><span></span><span></span></div>`;
-  container.appendChild(tDiv);
-  container.scrollTop = container.scrollHeight;
+  addMsg('user', escHtml(text));
+  showTyping();
 
   try {
-    const reply = await callGroq(text);
-    document.getElementById(typingId).remove();
-    addMsg("bot", formatBubble(reply), true);
+    const raw  = await callGroq(text);
+    const data = parseResponse(raw);
+    removeTyping();
+
+    const modeLabels = {
+      standard:   'Here\'s my analysis:',
+      contrarian: '⚡ Contrarian take — challenging the consensus:',
+      debate:     '⚖️ Both sides of the debate:'
+    };
+
+    addBotCard(modeLabels[mode], buildCard(data));
   } catch(e) {
-    document.getElementById(typingId).remove();
-    addMsg("bot", "Error connecting to Groq. Check your API key or connection.");
+    removeTyping();
+    addMsg('bot', `<span style="color:#f87171">Error: ${escHtml(e.message)}</span>`);
     console.error(e);
   }
-  
+
   btn.disabled = false;
+  input.focus();
 }
 
-function sendChip(text) {
-  document.getElementById("user-input").value = text;
+function sendChip(t) {
+  document.getElementById('user-input').value = t;
   sendMessage();
+}
+
+/* ── MODE ── */
+function setMode(m) {
+  mode = m;
+  ['standard','contrarian','debate'].forEach(k => {
+    document.getElementById('btn-'+k).classList.toggle('active', k===m);
+  });
+}
+</script>
+</body>
+</html>
 }
 </script>
 </body>
