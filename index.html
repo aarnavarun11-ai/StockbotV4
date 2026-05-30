@@ -3,472 +3,209 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stockbot AI Advisor</title>
+<title>StockAI — Live Technical Analysis</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0e14;
-  --bg2: #0f1520;
-  --bg3: #151d2e;
-  --border: rgba(255,255,255,0.07);
-  --border2: rgba(255,255,255,0.12);
-  --text: #e2e8f0;
-  --muted: #64748b;
-  --accent: #3b82f6;
-  --green: #10b981;
-  --red: #ef4444;
-  --amber: #f59e0b;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', sans-serif;
+  --bg: #0a0e14; --bg2: #0f1520; --bg3: #151d2e;
+  --border: rgba(255,255,255,0.07); --border2: rgba(255,255,255,0.12);
+  --text: #e2e8f0; --muted: #64748b;
+  --accent: #3b82f6; --green: #10b981; --red: #ef4444; --amber: #f59e0b;
+  --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: var(--bg); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 16px; }
+body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px); background-size: 32px 32px; pointer-events: none; }
 
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 16px;
-}
+#app { width: 100%; max-width: 580px; display: flex; flex-direction: column; height: calc(100vh - 32px); max-height: 820px; border: 1px solid var(--border2); border-radius: 16px; overflow: hidden; background: var(--bg2); }
 
-/* Ambient grid background */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(59,130,246,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59,130,246,0.03) 1px, transparent 1px);
-  background-size: 32px 32px;
-  pointer-events: none;
-}
-
-#app {
-  width: 100%;
-  max-width: 560px;
-  display: flex;
-  flex-direction: column;
-  height: calc(100vh - 32px);
-  max-height: 780px;
-  border: 1px solid var(--border2);
-  border-radius: 16px;
-  overflow: hidden;
-  background: var(--bg2);
-  position: relative;
-}
-
-/* ── HEADER ── */
-#header {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--bg3);
-  flex-shrink: 0;
-}
-.logo-mark {
-  width: 28px; height: 28px;
-  border-radius: 7px;
-  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  color: #fff;
-  flex-shrink: 0;
-}
-#header h2 { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
-#header .sub { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-.live-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green);
-  margin-left: auto;
-  box-shadow: 0 0 6px var(--green);
-  animation: pulse-dot 2s infinite;
-}
+/* HEADER */
+#header { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; background: var(--bg3); flex-shrink: 0; }
+.logo-mark { width: 28px; height: 28px; border-radius: 7px; background: linear-gradient(135deg,#1d4ed8,#3b82f6); display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 11px; font-weight: 600; color: #fff; flex-shrink: 0; }
+#header h2 { font-size: 14px; font-weight: 600; color: var(--text); }
+#header .sub { font-size: 10px; color: var(--muted); font-family: var(--mono); }
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); margin-left: auto; box-shadow: 0 0 6px var(--green); animation: pulse-dot 2s infinite; }
 @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-/* ── MODE TOGGLE ── */
-#mode-bar {
-  display: flex;
-  gap: 0;
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  background: var(--bg2);
-  flex-shrink: 0;
-}
-.mode-btn {
-  flex: 1;
-  padding: 6px 8px;
-  font-size: 11px;
-  font-family: var(--mono);
-  font-weight: 500;
-  color: var(--muted);
-  background: transparent;
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: all .15s;
-  text-align: center;
-}
+/* MODE BAR */
+#mode-bar { display: flex; gap: 0; padding: 9px 14px; border-bottom: 1px solid var(--border); background: var(--bg2); flex-shrink: 0; }
+.mode-btn { flex: 1; padding: 6px 4px; font-size: 10px; font-family: var(--mono); font-weight: 500; color: var(--muted); background: transparent; border: 1px solid var(--border); cursor: pointer; transition: all .15s; text-align: center; white-space: nowrap; }
 .mode-btn:first-child { border-radius: 6px 0 0 6px; }
 .mode-btn:last-child  { border-radius: 0 6px 6px 0; }
 .mode-btn:not(:first-child) { border-left: none; }
 .mode-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-/* ── CHIPS ── */
-#chips {
-  display: flex; gap: 6px;
-  padding: 8px 14px;
-  border-bottom: 1px solid var(--border);
-  overflow-x: auto; flex-shrink: 0;
-}
+/* CHIPS */
+#chips { display: flex; gap: 6px; padding: 8px 14px; border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
 #chips::-webkit-scrollbar { display: none; }
-.chip {
-  font-size: 11px;
-  font-family: var(--mono);
-  padding: 5px 10px;
-  border-radius: 99px;
-  border: 1px solid var(--border2);
-  color: var(--muted);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: all .15s;
-}
+.chip { font-size: 11px; font-family: var(--mono); padding: 5px 10px; border-radius: 99px; border: 1px solid var(--border2); color: var(--muted); cursor: pointer; white-space: nowrap; transition: all .15s; }
 .chip:hover { background: var(--bg3); color: var(--text); border-color: var(--accent); }
 
-/* ── MESSAGES ── */
-#messages {
-  flex: 1;
-  overflow-y: auto;
-  padding: 16px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  scroll-behavior: smooth;
-}
+/* MESSAGES */
+#messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; scroll-behavior: smooth; }
 #messages::-webkit-scrollbar { width: 3px; }
 #messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
-
-.msg { display: flex; flex-direction: column; max-width: 90%; }
+.msg { display: flex; flex-direction: column; max-width: 92%; }
 .msg.user { align-self: flex-end; align-items: flex-end; }
 .msg.bot  { align-self: flex-start; align-items: flex-start; }
+.msg-label { font-size: 10px; font-family: var(--mono); color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .06em; }
+.bubble { padding: 10px 13px; border-radius: 12px; font-size: 13px; line-height: 1.6; }
+.msg.user .bubble { background: var(--accent); color: #fff; border-bottom-right-radius: 3px; }
+.msg.bot .bubble  { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); border-bottom-left-radius: 3px; }
 
-.msg-label {
-  font-size: 10px;
-  font-family: var(--mono);
-  color: var(--muted);
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.bubble {
-  padding: 10px 13px;
-  border-radius: 12px;
-  font-size: 13.5px;
-  line-height: 1.6;
-}
-.msg.user .bubble {
-  background: var(--accent);
-  color: #fff;
-  border-bottom-right-radius: 3px;
-  font-weight: 400;
-}
-.msg.bot .bubble {
-  background: var(--bg3);
-  color: var(--text);
-  border: 1px solid var(--border2);
-  border-bottom-left-radius: 3px;
-}
-
-/* ── ANALYSIS CARD ── */
-.analysis-card {
-  margin-top: 8px;
-  background: var(--bg);
-  border: 1px solid var(--border2);
-  border-radius: 10px;
-  overflow: hidden;
-  font-size: 12px;
-  width: 100%;
-}
-.card-section {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border);
-}
+/* ANALYSIS CARD */
+.analysis-card { margin-top: 8px; background: var(--bg); border: 1px solid var(--border2); border-radius: 10px; overflow: hidden; font-size: 12px; width: 100%; }
+.card-section { padding: 10px 12px; border-bottom: 1px solid var(--border); }
 .card-section:last-child { border-bottom: none; }
-.card-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
-}
+.card-label { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
 
-/* Confidence bar */
-.conf-bar-wrap {
-  display: flex; align-items: center; gap: 8px;
-}
-.conf-bar-track {
-  flex: 1; height: 5px;
-  background: var(--border);
-  border-radius: 99px;
-  overflow: hidden;
-}
-.conf-bar-fill {
-  height: 100%;
-  border-radius: 99px;
-  transition: width .6s cubic-bezier(.4,0,.2,1);
-}
-.conf-val {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text);
-  min-width: 32px;
-  text-align: right;
-}
-
-/* Bull/Bear split */
-.bb-row { display: flex; gap: 6px; margin-top: 4px; }
-.bb-pill {
-  flex: 1; padding: 5px 8px;
-  border-radius: 7px;
-  font-size: 11px;
-  line-height: 1.5;
-}
-.bb-pill.bull { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2); color: #6ee7b7; }
-.bb-pill.bear { background: rgba(239,68,68,.08);  border: 1px solid rgba(239,68,68,.2);  color: #fca5a5; }
-.bb-pill-label {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 3px;
-}
-
-/* Contrarian flag */
-.contrarian-flag {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(245,158,11,.1);
-  border: 1px solid rgba(245,158,11,.25);
-  color: #fcd34d;
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 5px;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-}
+/* Price badge */
+.price-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(59,130,246,.12); border: 1px solid rgba(59,130,246,.25); color: #93c5fd; font-family: var(--mono); font-size: 13px; font-weight: 600; padding: 5px 11px; border-radius: 7px; margin-bottom: 6px; }
+.price-badge::before { content: '📡'; font-size: 11px; }
 
 /* Signal */
-.signal {
-  display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  padding: 5px 12px;
-  border-radius: 99px;
-  margin-top: 8px;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-}
-.signal.buy  { background: rgba(16,185,129,.15);  color: #34d399; border: 1px solid rgba(16,185,129,.3); }
-.signal.sell { background: rgba(239,68,68,.15);   color: #f87171; border: 1px solid rgba(239,68,68,.3); }
-.signal.hold { background: rgba(245,158,11,.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+.signal { display: inline-flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 99px; margin-top: 8px; letter-spacing: .06em; text-transform: uppercase; }
+.signal.buy  { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+.signal.sell { background: rgba(239,68,68,.15);  color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+.signal.hold { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
 
-/* Metrics row */
-.metrics-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 6px; margin-top: 4px;
-}
-.metric-box {
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 6px 8px;
-  text-align: center;
-}
-.metric-val {
-  font-family: var(--mono);
-  font-size: 13px; font-weight: 600;
-  color: var(--text);
-  display: block;
-}
-.metric-lbl {
-  font-size: 10px; color: var(--muted);
-  margin-top: 2px;
-}
+/* Confidence bar */
+.conf-bar-wrap { display: flex; align-items: center; gap: 8px; }
+.conf-bar-track { flex: 1; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.conf-bar-fill { height: 100%; border-radius: 99px; }
+.conf-val { font-family: var(--mono); font-size: 11px; min-width: 32px; text-align: right; }
 
-/* Typing */
-.typing { display: flex; gap: 5px; padding: 8px 0; align-items: center; }
-.typing span {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--muted);
-  animation: blink 1.2s infinite ease-in-out;
-}
-.typing span:nth-child(2) { animation-delay: .2s; }
-.typing span:nth-child(3) { animation-delay: .4s; }
-@keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+/* Metrics grid */
+.metrics-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 4px; }
+.metric-box { background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; text-align: center; }
+.metric-val { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--text); display: block; }
+.metric-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
 
-/* ── INPUT ── */
-#input-row {
-  display: flex; gap: 8px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--border);
-  background: var(--bg3);
-  flex-shrink: 0;
-}
-#user-input {
-  flex: 1;
-  padding: 9px 13px;
-  border-radius: 8px;
-  border: 1px solid var(--border2);
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 13px;
-  outline: none;
-  transition: border-color .15s;
-}
-#user-input::placeholder { color: var(--muted); }
-#user-input:focus { border-color: var(--accent); }
-#send-btn {
-  padding: 0 16px;
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  letter-spacing: .04em;
-  transition: opacity .15s, transform .1s;
-}
-#send-btn:hover { opacity: .9; }
-#send-btn:active { transform: scale(.97); }
-#send-btn:disabled { opacity: .35; cursor: default; }
+/* TA INDICATORS */
+.ta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 6px; }
+.ta-indicator { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.ta-ind-name { font-family: var(--mono); font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.ta-ind-val { font-family: var(--mono); font-size: 14px; font-weight: 600; color: var(--text); }
+.ta-ind-label { font-size: 10px; margin-top: 2px; }
+/* Gauge bar for indicators */
+.ta-bar-track { height: 4px; background: var(--border); border-radius: 99px; margin-top: 5px; overflow: hidden; position: relative; }
+.ta-bar-fill { height: 100%; border-radius: 99px; }
+/* RSI zones */
+.ta-zones { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; color: var(--muted); margin-top: 2px; }
 
-.disclaimer {
-  font-size: 10px;
-  font-family: var(--mono);
-  color: var(--muted);
-  text-align: center;
-  padding: 7px 14px;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-  letter-spacing: .02em;
-}
+/* MA row */
+.ma-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.ma-pill { font-family: var(--mono); font-size: 11px; padding: 3px 8px; border-radius: 5px; border: 1px solid var(--border); }
+.ma-pill.above { background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.2); color: #6ee7b7; }
+.ma-pill.below { background: rgba(239,68,68,.08);  border-color: rgba(239,68,68,.2);  color: #fca5a5; }
 
-/* Debate mode panel */
-.debate-panel {
-  padding: 10px 12px;
-  background: var(--bg);
-  border-top: 1px solid var(--border2);
-  font-size: 12px;
-}
-.debate-title {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: .08em;
-  margin-bottom: 8px;
-}
-.debate-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-.debate-side {
-  padding: 8px;
-  border-radius: 7px;
-  line-height: 1.5;
-  font-size: 12px;
-}
+/* Support/Resistance levels */
+.levels-row { display: flex; gap: 6px; margin-top: 4px; }
+.level-box { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; text-align: center; }
+.level-box.support  { border-color: rgba(16,185,129,.2); }
+.level-box.resist   { border-color: rgba(239,68,68,.2); }
+.level-val { font-family: var(--mono); font-size: 13px; font-weight: 600; }
+.level-val.support { color: #34d399; }
+.level-val.resist  { color: #f87171; }
+.level-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+/* TA overall signal badge */
+.ta-signal-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.ta-overall { font-family: var(--mono); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 99px; text-transform: uppercase; letter-spacing: .06em; }
+.ta-overall.strong-buy  { background: rgba(16,185,129,.2); color: #34d399; border: 1px solid rgba(16,185,129,.35); }
+.ta-overall.buy         { background: rgba(16,185,129,.1); color: #6ee7b7; border: 1px solid rgba(16,185,129,.2); }
+.ta-overall.neutral     { background: rgba(100,116,139,.1); color: #94a3b8; border: 1px solid rgba(100,116,139,.2); }
+.ta-overall.sell        { background: rgba(239,68,68,.1);  color: #fca5a5; border: 1px solid rgba(239,68,68,.2); }
+.ta-overall.strong-sell { background: rgba(239,68,68,.2);  color: #f87171; border: 1px solid rgba(239,68,68,.35); }
+
+/* Bull/bear pills */
+.bb-row { display: flex; gap: 6px; margin-top: 4px; }
+.bb-pill { flex: 1; padding: 5px 8px; border-radius: 7px; font-size: 11px; line-height: 1.5; }
+.bb-pill.bull { background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2); color: #6ee7b7; }
+.bb-pill.bear { background: rgba(239,68,68,.08);  border: 1px solid rgba(239,68,68,.2);  color: #fca5a5; }
+.bb-pill-label { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+
+/* Debate sides */
+.debate-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.debate-side { padding: 8px; border-radius: 7px; line-height: 1.5; font-size: 11.5px; }
 .debate-side.bull { background: rgba(16,185,129,.06); border: 1px solid rgba(16,185,129,.15); color: #a7f3d0; }
 .debate-side.bear { background: rgba(239,68,68,.06);  border: 1px solid rgba(239,68,68,.15);  color: #fecaca; }
-.debate-side-label {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 4px;
-  display: block;
-}
+.debate-side-label { font-family: var(--mono); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; display: block; }
 
-/* Live price badge */
-.price-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: rgba(59,130,246,.12);
-  border: 1px solid rgba(59,130,246,.25);
-  color: #93c5fd;
-  font-family: var(--mono);
-  font-size: 13px; font-weight: 600;
-  padding: 5px 11px;
-  border-radius: 7px;
-  margin-bottom: 4px;
-}
-.price-badge::before { content: '📡'; font-size: 11px; }
+/* Contrarian flag */
+.contrarian-flag { display: inline-flex; align-items: center; gap: 5px; background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.25); color: #fcd34d; font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 5px; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .05em; }
 
 /* Sources */
 .sources-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
-.source-tag {
-  font-family: var(--mono); font-size: 10px;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid var(--border);
-  color: var(--muted);
-}
+.source-tag { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 4px; background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted); }
+
+/* Chart embed */
+.chart-wrap { border-radius: 8px; overflow: hidden; margin-top: 8px; border: 1px solid var(--border2); }
+.chart-wrap iframe { display: block; width: 100%; height: 220px; border: none; background: #fff; }
+.chart-link { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px; font-family: var(--mono); font-size: 11px; color: var(--accent); text-decoration: none; border-top: 1px solid var(--border); }
+.chart-link:hover { background: var(--bg3); }
+
+/* Typing */
+.typing { display: flex; gap: 5px; padding: 8px 0; align-items: center; }
+.typing span { width: 5px; height: 5px; border-radius: 50%; background: var(--muted); animation: blink 1.2s infinite ease-in-out; }
+.typing span:nth-child(2) { animation-delay: .2s; }
+.typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
+.searching-label { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-bottom: 6px; }
+
+/* INPUT */
+#input-row { display: flex; gap: 8px; padding: 11px 14px; border-top: 1px solid var(--border); background: var(--bg3); flex-shrink: 0; }
+#user-input { flex: 1; padding: 9px 13px; border-radius: 8px; border: 1px solid var(--border2); background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 13px; outline: none; transition: border-color .15s; }
+#user-input::placeholder { color: var(--muted); }
+#user-input:focus { border-color: var(--accent); }
+#send-btn { padding: 0 16px; background: var(--accent); color: #fff; border: none; border-radius: 8px; font-family: var(--mono); font-size: 12px; font-weight: 600; cursor: pointer; letter-spacing: .04em; transition: opacity .15s, transform .1s; }
+#send-btn:hover { opacity: .9; }
+#send-btn:active { transform: scale(.97); }
+#send-btn:disabled { opacity: .35; cursor: default; }
+.disclaimer { font-size: 10px; font-family: var(--mono); color: var(--muted); text-align: center; padding: 7px 14px; background: var(--bg2); border-top: 1px solid var(--border); flex-shrink: 0; }
 </style>
 </head>
 <body>
 <div id="app">
-
-  <!-- Header -->
   <div id="header">
     <div class="logo-mark">AI</div>
     <div>
       <h2>StockAI Advisor</h2>
-      <div class="sub">Contrarian Analysis Engine v2.0</div>
+      <div class="sub">Live Technical + Fundamental Analysis</div>
     </div>
-    <div class="live-dot" title="Live"></div>
+    <div class="live-dot"></div>
   </div>
 
-  <!-- Mode bar -->
   <div id="mode-bar">
     <button class="mode-btn active" onclick="setMode('standard')"    id="btn-standard">Standard</button>
+    <button class="mode-btn"        onclick="setMode('technical')"   id="btn-technical">⚡ Technical</button>
     <button class="mode-btn"        onclick="setMode('contrarian')"  id="btn-contrarian">Contrarian</button>
-    <button class="mode-btn"        onclick="setMode('debate')"      id="btn-debate">Bull/Bear Debate</button>
+    <button class="mode-btn"        onclick="setMode('debate')"      id="btn-debate">Bull/Bear</button>
   </div>
 
-  <!-- Quick chips -->
   <div id="chips">
-    <div class="chip" onclick="sendChip('Analyze NVDA')">NVDA</div>
-    <div class="chip" onclick="sendChip('Analyze AAPL')">AAPL</div>
-    <div class="chip" onclick="sendChip('Analyze TSLA')">TSLA</div>
-    <div class="chip" onclick="sendChip('Analyze MSFT')">MSFT</div>
-    <div class="chip" onclick="sendChip('Analyze SPY')">SPY</div>
-    <div class="chip" onclick="sendChip('Top AI stocks right now')">AI Stocks</div>
+    <div class="chip" onclick="sendChip('Technical analysis NVDA')">NVDA</div>
+    <div class="chip" onclick="sendChip('Technical analysis AAPL')">AAPL</div>
+    <div class="chip" onclick="sendChip('Technical analysis TSLA')">TSLA</div>
+    <div class="chip" onclick="sendChip('Technical analysis MSFT')">MSFT</div>
+    <div class="chip" onclick="sendChip('Technical analysis SPY')">SPY</div>
+    <div class="chip" onclick="sendChip('Technical analysis BTC-USD')">BTC</div>
   </div>
 
-  <!-- Messages -->
   <div id="messages">
     <div class="msg bot">
-      <div class="msg-label">StockAI v2</div>
+      <div class="msg-label">StockAI</div>
       <div class="bubble">
-        Welcome to the Contrarian Analysis Engine. I use statistical reasoning to challenge assumptions and provide balanced views — even when they disagree with yours.<br><br>
-        Try the <strong>Contrarian</strong> or <strong>Bull/Bear Debate</strong> modes above, then ask about any ticker.
+        Welcome! I now have <strong>live web search + Technical Analysis mode</strong>.<br><br>
+        Switch to <strong>⚡ Technical</strong> mode and ask about any ticker — I'll search Yahoo Finance for live RSI, MACD, moving averages, support/resistance levels, and volume data, then render it as a visual dashboard.
       </div>
     </div>
   </div>
 
-  <!-- Input -->
   <div id="input-row">
-    <input id="user-input" type="text" placeholder="Enter ticker or market opinion..." onkeydown="if(event.key==='Enter')sendMessage()" />
+    <input id="user-input" type="text" placeholder="Enter ticker or question..." onkeydown="if(event.key==='Enter')sendMessage()" />
     <button id="send-btn" onclick="sendMessage()">SEND</button>
   </div>
-
   <div class="disclaimer">⚠ Educational only — not financial advice. Past performance ≠ future results.</div>
 </div>
 
@@ -477,301 +214,346 @@ const API_KEY = "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";
 const history = [];
 let mode = 'standard';
 
-/* ── SYSTEM PROMPTS — all use live web search ── */
+/* ── SYSTEM PROMPTS ── */
 const PROMPTS = {
-  standard: `You are StockAI, a real-time stock analyst with live web search access. For EVERY query you MUST search the web first to find: (1) the current stock price and today's % change, (2) recent news from the last 48 hours from Yahoo Finance, CNBC, Bloomberg, Reuters, or MarketWatch, (3) any recent analyst ratings or price targets.
 
-After searching, respond with ONLY this raw JSON (no markdown, no extra text):
+standard: `You are StockAI, a real-time stock analyst with live web search. For EVERY query search the web for: (1) current price & today's % change, (2) recent news last 48h from Yahoo Finance/CNBC/Bloomberg, (3) recent analyst ratings.
+
+Respond with ONLY raw JSON, no markdown:
 {
-  "price": "current price string e.g. $142.50 (+1.2% today) — use LIVE data",
-  "analysis": "3-4 sentences using the LIVE price, news, and data you just found",
-  "bull_case": "1-2 sentence bull argument citing a specific live news item or metric",
-  "bear_case": "1-2 sentence bear argument citing a specific live risk or headline",
-  "confidence": <integer 30-90>,
-  "signal": "BUY" or "SELL" or "HOLD",
+  "price": "e.g. $142.50 (+1.2% today)",
+  "analysis": "3-4 sentences using LIVE data found",
+  "bull_case": "1-2 sentence bull argument from live data",
+  "bear_case": "1-2 sentence bear argument from live data",
+  "confidence": <30-90>,
+  "signal": "BUY"|"SELL"|"HOLD",
   "is_contrarian": false,
-  "sources": ["e.g. Yahoo Finance", "CNBC", "Reuters"],
-  "metrics": {
-    "sentiment": "Bullish" or "Bearish" or "Neutral",
-    "volatility": "Low" or "Medium" or "High",
-    "timeframe": "Short-term" or "Mid-term" or "Long-term"
-  }
+  "sources": ["Yahoo Finance","CNBC"],
+  "ta": null,
+  "metrics": { "sentiment":"Bullish"|"Bearish"|"Neutral", "volatility":"Low"|"Medium"|"High", "timeframe":"Short-term"|"Mid-term"|"Long-term" }
 }`,
 
-  contrarian: `You are StockAI in CONTRARIAN MODE with live web search. Search for the current price and the mainstream consensus view from recent news. Then argue AGAINST whatever the crowd believes using the live data you found.
+technical: `You are StockAI in TECHNICAL ANALYSIS MODE. You have live web search. For the given ticker, search Yahoo Finance (finance.yahoo.com/quote/TICKER/chart), Finviz, TradingView, and any technical analysis sites to find REAL current values for all indicators.
 
-Respond with ONLY this raw JSON:
+Search specifically for:
+- Current RSI (14) value
+- MACD line and signal line values, and whether MACD is bullish or bearish crossover
+- 50-day and 200-day moving average values vs current price
+- Recent volume vs 30-day average volume
+- Key support and resistance price levels
+- Overall technical rating (from Finviz, TradingView, or Yahoo Finance technical analysis tab)
+
+Then respond with ONLY raw JSON, no markdown, no extra text:
 {
-  "price": "current live price string",
-  "analysis": "3-4 sentence contrarian take CHALLENGING the live consensus — cite specific headlines",
-  "bull_case": "Brief steelman of the consensus from recent news",
-  "bear_case": "Your contrarian counter-argument with live data",
-  "confidence": <integer 35-75>,
-  "signal": "BUY" or "SELL" or "HOLD",
+  "ticker": "NVDA",
+  "price": "current price e.g. $142.50 (+1.2% today)",
+  "analysis": "3-4 sentence technical summary explaining what the indicators collectively mean for the stock's near-term direction",
+  "signal": "BUY"|"SELL"|"HOLD",
+  "confidence": <30-90>,
+  "is_contrarian": false,
+  "sources": ["Yahoo Finance","Finviz","TradingView"],
+  "ta": {
+    "rsi": <actual number e.g. 62.4>,
+    "rsi_signal": "Overbought"|"Neutral"|"Oversold",
+    "macd_bullish": true|false,
+    "macd_note": "brief note e.g. bullish crossover above signal line",
+    "ma50": <actual price value>,
+    "ma200": <actual price value>,
+    "price_vs_ma50": "Above"|"Below",
+    "price_vs_ma200": "Above"|"Below",
+    "volume_vs_avg": "Above Average"|"Below Average"|"Average",
+    "volume_note": "e.g. 2.1x average on breakout day",
+    "support": <key support price level as number>,
+    "resistance": <key resistance price level as number>,
+    "ta_overall": "Strong Buy"|"Buy"|"Neutral"|"Sell"|"Strong Sell",
+    "trend": "Uptrend"|"Downtrend"|"Sideways"
+  },
+  "metrics": { "sentiment":"Bullish"|"Bearish"|"Neutral", "volatility":"Low"|"Medium"|"High", "timeframe":"Short-term" }
+}`,
+
+contrarian: `You are StockAI CONTRARIAN MODE with live web search. Search for current price and mainstream consensus from recent news. Argue AGAINST the crowd using live data.
+
+Respond with ONLY raw JSON:
+{
+  "price": "live price string",
+  "analysis": "3-4 sentence contrarian take CHALLENGING consensus — cite specific headlines",
+  "bull_case": "steelman of consensus from news",
+  "bear_case": "contrarian counter-argument with live data",
+  "confidence": <35-75>,
+  "signal": "BUY"|"SELL"|"HOLD",
   "is_contrarian": true,
-  "sources": ["source1", "source2"],
-  "metrics": {
-    "sentiment": "Bullish" or "Bearish" or "Neutral",
-    "volatility": "Low" or "Medium" or "High",
-    "timeframe": "Short-term" or "Mid-term" or "Long-term"
-  }
+  "sources": ["source1","source2"],
+  "ta": null,
+  "metrics": { "sentiment":"Bullish"|"Bearish"|"Neutral", "volatility":"Low"|"Medium"|"High", "timeframe":"Short-term"|"Mid-term"|"Long-term" }
 }`,
 
-  debate: `You are StockAI in BULL/BEAR DEBATE MODE with live web search. Search for the current price, latest news, and analyst opinions. Build BOTH sides using only live data.
+debate: `You are StockAI BULL/BEAR DEBATE MODE with live web search. Search for price, news, analyst opinions. Build BOTH sides from live data.
 
-Respond with ONLY this raw JSON:
+Respond with ONLY raw JSON:
 {
-  "price": "current live price string",
-  "analysis": "2-sentence neutral framing of the live debate happening right now",
-  "bull_case": "3-4 sentence bull argument built entirely from live news, catalysts, and data",
-  "bear_case": "3-4 sentence bear argument from live risks, headlines, and valuation data",
-  "confidence": <integer 40-60>,
+  "price": "live price string",
+  "analysis": "2-sentence neutral framing of live debate",
+  "bull_case": "3-4 sentence bull from live catalysts",
+  "bear_case": "3-4 sentence bear from live risks",
+  "confidence": <40-60>,
   "signal": "HOLD",
   "is_contrarian": false,
-  "sources": ["source1", "source2"],
-  "metrics": {
-    "sentiment": "Neutral",
-    "volatility": "Medium",
-    "timeframe": "Mid-term"
-  }
+  "sources": ["source1","source2"],
+  "ta": null,
+  "metrics": { "sentiment":"Neutral", "volatility":"Medium", "timeframe":"Mid-term" }
 }`
 };
 
-/* ── GROQ API CALL — uses compound-beta for live web search ── */
+/* ── API CALL ── */
 async function callGroq(userMsg) {
-  if (location.protocol === 'file:') {
-    throw new Error('Open via a server (GitHub Pages or VS Code Live Server), not file://');
-  }
-
+  if (location.protocol === 'file:') throw new Error('Open via GitHub Pages or VS Code Live Server, not file://');
   history.push({ role: "user", content: userMsg });
-
   let res;
   try {
     res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_KEY}`
-      },
+      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
       body: JSON.stringify({
         model: "compound-beta",
-        messages: [
-          { role: "system", content: PROMPTS[mode] },
-          ...history
-        ],
-        temperature: mode === 'contrarian' ? 0.8 : 0.65,
-        max_tokens: 900
+        messages: [{ role: "system", content: PROMPTS[mode] }, ...history],
+        temperature: mode === 'contrarian' ? 0.8 : 0.6,
+        max_tokens: 1100
       })
     });
-  } catch (networkErr) {
-    throw new Error('Network error. Check your internet connection or API key at console.groq.com');
-  }
+  } catch(e) { throw new Error('Network error — check connection or API key at console.groq.com'); }
 
   const data = await res.json();
-
   if (data.error) {
-    const msg = data.error.message || JSON.stringify(data.error);
     if (res.status === 401) throw new Error('Invalid API key — get a new one at console.groq.com/keys');
-    if (res.status === 429) throw new Error('Rate limit hit. Wait 30 seconds and try again.');
-    if (res.status === 404) throw new Error('Model not found. Your Groq key may not have access to compound-beta yet.');
-    throw new Error(msg);
+    if (res.status === 429) throw new Error('Rate limit hit. Wait 30s and try again.');
+    if (res.status === 404) throw new Error('Model not found. Your key may need compound-beta access.');
+    throw new Error(data.error.message || JSON.stringify(data.error));
   }
-
-  // compound-beta returns executed_tools in the message — grab them for source display
   const msg = data.choices[0].message;
   const text = msg.content || '';
   const tools = msg.executed_tools || [];
-
   history.push({ role: "assistant", content: text });
   return { text, tools };
 }
 
-/* ── PARSE RESPONSE ── */
+/* ── PARSE ── */
 function parseResponse(raw) {
   try {
-    const cleaned = raw.replace(/```json|```/g, '').trim();
-    // Find JSON object in the string
-    const start = cleaned.indexOf('{');
-    const end = cleaned.lastIndexOf('}');
-    if (start === -1 || end === -1) throw new Error('No JSON found');
-    return JSON.parse(cleaned.slice(start, end + 1));
+    const cleaned = raw.replace(/```json|```/g,'').trim();
+    const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
+    if (s === -1 || e === -1) throw new Error('no json');
+    return JSON.parse(cleaned.slice(s, e+1));
   } catch {
-    const sig = raw.match(/SIGNAL:\s*(BUY|SELL|HOLD)/i);
-    return {
-      price: 'N/A',
-      analysis: raw.replace(/SIGNAL:.*/gi,'').trim().slice(0, 400),
-      bull_case: '',
-      bear_case: '',
-      confidence: 50,
-      signal: sig ? sig[1].toUpperCase() : 'HOLD',
-      is_contrarian: false,
-      sources: [],
-      metrics: { sentiment: 'Neutral', volatility: 'Medium', timeframe: 'Mid-term' }
-    };
+    return { price:'N/A', analysis: raw.slice(0,400), bull_case:'', bear_case:'', confidence:50, signal:'HOLD', is_contrarian:false, sources:[], ta:null, metrics:{sentiment:'Neutral',volatility:'Medium',timeframe:'Mid-term'} };
   }
 }
 
-/* ── BUILD CARD HTML ── */
-function buildCard(d, tools) {
-  const sigClass = (d.signal || 'HOLD').toLowerCase();
-  const sigIcons = { BUY: '▲', SELL: '▼', HOLD: '◆' };
-  const sig = d.signal || 'HOLD';
+/* ── RENDER HELPERS ── */
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
 
-  const confColor = d.confidence >= 70 ? '#10b981' : d.confidence >= 50 ? '#f59e0b' : '#ef4444';
-  const sentColor = d.metrics?.sentiment === 'Bullish' ? '#34d399' :
-                    d.metrics?.sentiment === 'Bearish' ? '#f87171' : '#94a3b8';
+function rsiColor(v) { return v >= 70 ? '#ef4444' : v <= 30 ? '#10b981' : '#f59e0b'; }
+function rsiLabel(v) { return v >= 70 ? 'Overbought' : v <= 30 ? 'Oversold' : 'Neutral'; }
+function confColor(v) { return v >= 70 ? '#10b981' : v >= 50 ? '#f59e0b' : '#ef4444'; }
+function sentColor(s) { return s==='Bullish'?'#34d399':s==='Bearish'?'#f87171':'#94a3b8'; }
 
-  const contrFlag = d.is_contrarian
-    ? `<div class="contrarian-flag">⚡ Contrarian — challenges consensus</div>` : '';
+function buildTASection(ta, ticker) {
+  if (!ta) return '';
+  const rsiPct = Math.min(100, Math.max(0, ((ta.rsi||50)/100)*100));
+  const rsiCol = rsiColor(ta.rsi||50);
+  const macdIcon = ta.macd_bullish ? '▲' : '▼';
+  const macdCol  = ta.macd_bullish ? '#34d399' : '#f87171';
+  const taOvClass = (ta.ta_overall||'Neutral').toLowerCase().replace(' ','-');
+  const trendCol = ta.trend==='Uptrend'?'#34d399':ta.trend==='Downtrend'?'#f87171':'#94a3b8';
 
-  // Live price badge
-  const priceBadge = d.price && d.price !== 'N/A'
-    ? `<div class="price-badge">${escHtml(d.price)}</div>` : '';
+  // MA pill classes
+  const ma50cls  = ta.price_vs_ma50  === 'Above' ? 'above' : 'below';
+  const ma200cls = ta.price_vs_ma200 === 'Above' ? 'above' : 'below';
 
-  // Sources from AI response + tool calls
-  const allSources = [...(d.sources || [])];
-  if (tools && tools.length) {
-    tools.forEach(t => {
-      try {
-        const args = JSON.parse(t.arguments || '{}');
-        if (args.query) allSources.push('🔍 Searched: ' + args.query);
-      } catch {}
-    });
-  }
-  const sourcesHtml = allSources.length
-    ? `<div class="card-section">
-        <div class="card-label">Live Sources Used</div>
-        <div class="sources-list">${allSources.map(s => `<span class="source-tag">${escHtml(s)}</span>`).join('')}</div>
-      </div>` : '';
-
-  const debateSection = (mode === 'debate' && d.bull_case && d.bear_case)
-    ? `<div class="card-section">
-        <div class="card-label">Live Bull vs Bear Debate</div>
-        <div class="debate-row">
-          <div class="debate-side bull"><span class="debate-side-label">▲ Bull</span>${escHtml(d.bull_case)}</div>
-          <div class="debate-side bear"><span class="debate-side-label">▼ Bear</span>${escHtml(d.bear_case)}</div>
-        </div>
-      </div>`
-    : (d.bull_case || d.bear_case)
-    ? `<div class="card-section">
-        <div class="bb-row">
-          ${d.bull_case ? `<div class="bb-pill bull"><div class="bb-pill-label">▲ Bull</div>${escHtml(d.bull_case)}</div>` : ''}
-          ${d.bear_case ? `<div class="bb-pill bear"><div class="bb-pill-label">▼ Bear</div>${escHtml(d.bear_case)}</div>` : ''}
-        </div>
-      </div>` : '';
+  const chartLink = ticker ? `https://finance.yahoo.com/chart/${ticker.toUpperCase()}` : '';
 
   return `
-    <div class="analysis-card">
-      <div class="card-section">
-        ${contrFlag}
-        ${priceBadge}
-        <div class="card-label" style="margin-top:${priceBadge?'8px':'0'}">Live Analysis</div>
-        <div style="color:var(--text);line-height:1.6;font-size:12.5px">${escHtml(d.analysis)}</div>
-        <span class="signal ${sigClass}">${sigIcons[sig]||'◆'} ${sig}</span>
-      </div>
-      ${debateSection}
-      <div class="card-section">
-        <div class="card-label">Confidence</div>
-        <div class="conf-bar-wrap">
-          <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${d.confidence}%;background:${confColor}"></div></div>
-          <div class="conf-val" style="color:${confColor}">${d.confidence}%</div>
+    <div class="card-section">
+      <div class="card-label">⚡ Technical Indicators — Live from Yahoo Finance</div>
+
+      <div class="ta-grid">
+        <!-- RSI -->
+        <div class="ta-indicator">
+          <div class="ta-ind-name">RSI (14)</div>
+          <div class="ta-ind-val" style="color:${rsiCol}">${ta.rsi != null ? ta.rsi.toFixed(1) : 'N/A'}</div>
+          <div class="ta-ind-label" style="color:${rsiCol}">${esc(ta.rsi_signal || rsiLabel(ta.rsi||50))}</div>
+          <div class="ta-bar-track">
+            <div class="ta-bar-fill" style="width:${ta.rsi||50}%;background:${rsiCol}"></div>
+          </div>
+          <div class="ta-zones"><span>0 Oversold 30</span><span>70 Overbought 100</span></div>
+        </div>
+
+        <!-- MACD -->
+        <div class="ta-indicator">
+          <div class="ta-ind-name">MACD</div>
+          <div class="ta-ind-val" style="color:${macdCol}">${macdIcon} ${ta.macd_bullish ? 'Bullish' : 'Bearish'}</div>
+          <div class="ta-ind-label" style="color:var(--muted)">${esc(ta.macd_note||'')}</div>
+        </div>
+
+        <!-- Volume -->
+        <div class="ta-indicator">
+          <div class="ta-ind-name">Volume</div>
+          <div class="ta-ind-val" style="color:${ta.volume_vs_avg==='Above Average'?'#34d399':ta.volume_vs_avg==='Below Average'?'#f87171':'#94a3b8'}">${esc(ta.volume_vs_avg||'N/A')}</div>
+          <div class="ta-ind-label" style="color:var(--muted)">${esc(ta.volume_note||'')}</div>
+        </div>
+
+        <!-- Trend -->
+        <div class="ta-indicator">
+          <div class="ta-ind-name">Trend</div>
+          <div class="ta-ind-val" style="color:${trendCol}">${esc(ta.trend||'N/A')}</div>
+          <div class="ta-ind-label" style="color:var(--muted)">Overall direction</div>
         </div>
       </div>
-      <div class="card-section">
-        <div class="card-label">Snapshot</div>
-        <div class="metrics-grid">
-          <div class="metric-box"><span class="metric-val" style="color:${sentColor}">${d.metrics?.sentiment||'N/A'}</span><div class="metric-lbl">Sentiment</div></div>
-          <div class="metric-box"><span class="metric-val">${d.metrics?.volatility||'N/A'}</span><div class="metric-lbl">Volatility</div></div>
-          <div class="metric-box"><span class="metric-val" style="font-size:10px">${d.metrics?.timeframe||'N/A'}</span><div class="metric-lbl">Timeframe</div></div>
+    </div>
+
+    <div class="card-section">
+      <div class="card-label">Moving Averages</div>
+      <div class="ma-row">
+        <span class="ma-pill ${ma50cls}">MA50 $${ta.ma50 != null ? Number(ta.ma50).toFixed(2) : 'N/A'} (${esc(ta.price_vs_ma50||'?')})</span>
+        <span class="ma-pill ${ma200cls}">MA200 $${ta.ma200 != null ? Number(ta.ma200).toFixed(2) : 'N/A'} (${esc(ta.price_vs_ma200||'?')})</span>
+      </div>
+    </div>
+
+    <div class="card-section">
+      <div class="card-label">Support &amp; Resistance Levels</div>
+      <div class="levels-row">
+        <div class="level-box support">
+          <div class="level-val support">$${ta.support != null ? Number(ta.support).toFixed(2) : 'N/A'}</div>
+          <div class="level-lbl">▲ Support</div>
+        </div>
+        <div class="level-box resist">
+          <div class="level-val resist">$${ta.resistance != null ? Number(ta.resistance).toFixed(2) : 'N/A'}</div>
+          <div class="level-lbl">▼ Resistance</div>
         </div>
       </div>
-      ${sourcesHtml}
-    </div>`;
+    </div>
+
+    <div class="card-section">
+      <div class="card-label">TA Overall Rating</div>
+      <div class="ta-signal-row">
+        <span class="ta-overall ${taOvClass}">${esc(ta.ta_overall||'Neutral')}</span>
+      </div>
+    </div>
+
+    ${chartLink ? `
+    <div class="card-section">
+      <div class="card-label">Yahoo Finance Chart</div>
+      <div class="chart-wrap">
+        <a href="${chartLink}" target="_blank" class="chart-link">
+          📊 Open live chart for ${esc(ticker)} on Yahoo Finance →
+        </a>
+      </div>
+    </div>` : ''}
+  `;
 }
 
-function escHtml(str) {
-  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+function buildCard(d, tools) {
+  const sig = (d.signal||'HOLD');
+  const sigClass = sig.toLowerCase();
+  const sigIcons = { BUY:'▲', SELL:'▼', HOLD:'◆' };
+  const cc = confColor(d.confidence||50);
+  const sc = sentColor(d.metrics?.sentiment);
+
+  const contrFlag = d.is_contrarian ? `<div class="contrarian-flag">⚡ Contrarian — challenges consensus</div>` : '';
+  const priceBadge = d.price && d.price!=='N/A' ? `<div class="price-badge">${esc(d.price)}</div>` : '';
+
+  const allSources = [...(d.sources||[])];
+  if (tools?.length) tools.forEach(t => { try { const a=JSON.parse(t.arguments||'{}'); if(a.query) allSources.push('🔍 '+a.query); } catch{} });
+  const sourcesHtml = allSources.length ? `<div class="card-section"><div class="card-label">Live Sources</div><div class="sources-list">${allSources.map(s=>`<span class="source-tag">${esc(s)}</span>`).join('')}</div></div>` : '';
+
+  const taSection = buildTASection(d.ta, d.ticker);
+
+  const debateSection = mode==='debate' && d.bull_case && d.bear_case
+    ? `<div class="card-section"><div class="card-label">Live Bull vs Bear</div><div class="debate-row"><div class="debate-side bull"><span class="debate-side-label">▲ Bull</span>${esc(d.bull_case)}</div><div class="debate-side bear"><span class="debate-side-label">▼ Bear</span>${esc(d.bear_case)}</div></div></div>`
+    : (d.bull_case||d.bear_case)
+    ? `<div class="card-section"><div class="bb-row">${d.bull_case?`<div class="bb-pill bull"><div class="bb-pill-label">▲ Bull</div>${esc(d.bull_case)}</div>`:''} ${d.bear_case?`<div class="bb-pill bear"><div class="bb-pill-label">▼ Bear</div>${esc(d.bear_case)}</div>`:''}</div></div>` : '';
+
+  return `<div class="analysis-card">
+    <div class="card-section">
+      ${contrFlag}${priceBadge}
+      <div class="card-label" style="margin-top:${priceBadge?'8px':'0'}">${mode==='technical'?'Technical Analysis':'Live Analysis'}</div>
+      <div style="color:var(--text);line-height:1.6;font-size:12.5px">${esc(d.analysis)}</div>
+      <span class="signal ${sigClass}">${sigIcons[sig]||'◆'} ${sig}</span>
+    </div>
+    ${taSection}
+    ${debateSection}
+    <div class="card-section">
+      <div class="card-label">Confidence</div>
+      <div class="conf-bar-wrap">
+        <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${d.confidence||50}%;background:${cc}"></div></div>
+        <div class="conf-val" style="color:${cc}">${d.confidence||50}%</div>
+      </div>
+    </div>
+    <div class="card-section">
+      <div class="card-label">Snapshot</div>
+      <div class="metrics-grid">
+        <div class="metric-box"><span class="metric-val" style="color:${sc}">${d.metrics?.sentiment||'N/A'}</span><div class="metric-lbl">Sentiment</div></div>
+        <div class="metric-box"><span class="metric-val">${d.metrics?.volatility||'N/A'}</span><div class="metric-lbl">Volatility</div></div>
+        <div class="metric-box"><span class="metric-val" style="font-size:10px">${d.metrics?.timeframe||'N/A'}</span><div class="metric-lbl">Timeframe</div></div>
+      </div>
+    </div>
+    ${sourcesHtml}
+  </div>`;
 }
 
-/* ── DOM HELPERS ── */
+/* ── DOM ── */
 function addMsg(role, html) {
-  const wrap = document.getElementById('messages');
+  const w = document.getElementById('messages');
   const d = document.createElement('div');
   d.className = `msg ${role}`;
   d.innerHTML = `<div class="msg-label">${role==='user'?'You':'StockAI Live'}</div><div class="bubble">${html}</div>`;
-  wrap.appendChild(d);
-  wrap.scrollTop = wrap.scrollHeight;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
 
-function addBotCard(bubbleHtml, cardHtml) {
-  const wrap = document.getElementById('messages');
+function addBotCard(bubble, card) {
+  const w = document.getElementById('messages');
   const d = document.createElement('div');
-  d.className = 'msg bot';
-  d.style.maxWidth = '100%';
-  d.innerHTML = `<div class="msg-label">StockAI Live</div><div class="bubble">${bubbleHtml}</div>${cardHtml}`;
-  wrap.appendChild(d);
-  wrap.scrollTop = wrap.scrollHeight;
+  d.className = 'msg bot'; d.style.maxWidth = '100%';
+  d.innerHTML = `<div class="msg-label">StockAI Live</div><div class="bubble">${bubble}</div>${card}`;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
 
-function showTyping(searching) {
-  const wrap = document.getElementById('messages');
+function showTyping() {
+  const w = document.getElementById('messages');
   const d = document.createElement('div');
-  d.id = 'typing-ind';
-  d.className = 'msg bot';
-  const label = searching ? '🔍 Searching live data...' : '';
-  d.innerHTML = `<div class="msg-label">StockAI Live</div>
-    <div class="bubble">
-      ${label ? `<div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">${label}</div>` : ''}
-      <div class="typing"><span></span><span></span><span></span></div>
-    </div>`;
-  wrap.appendChild(d);
-  wrap.scrollTop = wrap.scrollHeight;
+  d.id = 'typing-ind'; d.className = 'msg bot';
+  const lbl = mode==='technical' ? '⚡ Searching Yahoo Finance for live indicators...' : '🔍 Searching live market data...';
+  d.innerHTML = `<div class="msg-label">StockAI Live</div><div class="bubble"><div class="searching-label">${lbl}</div><div class="typing"><span></span><span></span><span></span></div></div>`;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
+function removeTyping() { const t=document.getElementById('typing-ind'); if(t) t.remove(); }
 
-function removeTyping() {
-  const t = document.getElementById('typing-ind');
-  if (t) t.remove();
-}
-
-/* ── SEND ── */
 async function sendMessage() {
   const input = document.getElementById('user-input');
   const btn   = document.getElementById('send-btn');
   const text  = input.value.trim();
   if (!text) return;
-  input.value = '';
-  btn.disabled = true;
-  addMsg('user', escHtml(text));
-  showTyping(true);
-
+  input.value = ''; btn.disabled = true;
+  addMsg('user', esc(text));
+  showTyping();
   try {
     const { text: raw, tools } = await callGroq(text);
     const data = parseResponse(raw);
     removeTyping();
-    const modeLabels = {
-      standard:   '📡 Live analysis:',
-      contrarian: '⚡ Contrarian take on live data:',
-      debate:     '⚖️ Live bull vs bear:'
-    };
-    addBotCard(modeLabels[mode], buildCard(data, tools));
+    const labels = { standard:'📡 Live analysis:', technical:'⚡ Technical analysis:', contrarian:'⚡ Contrarian take:', debate:'⚖️ Live bull vs bear:' };
+    addBotCard(labels[mode], buildCard(data, tools));
   } catch(e) {
     removeTyping();
-    addMsg('bot', `<span style="color:#f87171">⚠ ${escHtml(e.message)}</span>`);
+    addMsg('bot', `<span style="color:#f87171">⚠ ${esc(e.message)}</span>`);
     console.error(e);
   }
-
-  btn.disabled = false;
-  input.focus();
+  btn.disabled = false; input.focus();
 }
 
-function sendChip(t) {
-  document.getElementById('user-input').value = t;
-  sendMessage();
-}
+function sendChip(t) { document.getElementById('user-input').value=t; sendMessage(); }
 
 function setMode(m) {
   mode = m;
-  ['standard','contrarian','debate'].forEach(k => {
+  ['standard','technical','contrarian','debate'].forEach(k => {
     document.getElementById('btn-'+k).classList.toggle('active', k===m);
   });
 }
