@@ -395,6 +395,31 @@ body::before {
   margin-bottom: 4px;
   display: block;
 }
+
+/* Live price badge */
+.price-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(59,130,246,.12);
+  border: 1px solid rgba(59,130,246,.25);
+  color: #93c5fd;
+  font-family: var(--mono);
+  font-size: 13px; font-weight: 600;
+  padding: 5px 11px;
+  border-radius: 7px;
+  margin-bottom: 4px;
+}
+.price-badge::before { content: '📡'; font-size: 11px; }
+
+/* Sources */
+.sources-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.source-tag {
+  font-family: var(--mono); font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
 </style>
 </head>
 <body>
@@ -452,72 +477,70 @@ const API_KEY = "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";
 const history = [];
 let mode = 'standard';
 
-/* ── SYSTEM PROMPTS ── */
+/* ── SYSTEM PROMPTS — all use live web search ── */
 const PROMPTS = {
-  standard: `You are StockAI, a precise quantitative stock analyst with expertise in fundamental and technical analysis.
+  standard: `You are StockAI, a real-time stock analyst with live web search access. For EVERY query you MUST search the web first to find: (1) the current stock price and today's % change, (2) recent news from the last 48 hours from Yahoo Finance, CNBC, Bloomberg, Reuters, or MarketWatch, (3) any recent analyst ratings or price targets.
 
-For every response, output EXACTLY this JSON structure (no markdown, no extra text, just raw JSON):
+After searching, respond with ONLY this raw JSON (no markdown, no extra text):
 {
-  "analysis": "3-4 sentence analytical summary using specific financial metrics, sector trends, and macro context",
-  "bull_case": "1-2 sentence bullish argument with a specific data point",
-  "bear_case": "1-2 sentence bearish argument with a specific data point",
+  "price": "current price string e.g. $142.50 (+1.2% today) — use LIVE data",
+  "analysis": "3-4 sentences using the LIVE price, news, and data you just found",
+  "bull_case": "1-2 sentence bull argument citing a specific live news item or metric",
+  "bear_case": "1-2 sentence bear argument citing a specific live risk or headline",
   "confidence": <integer 30-90>,
-  "signal": "BUY" | "SELL" | "HOLD",
+  "signal": "BUY" or "SELL" or "HOLD",
   "is_contrarian": false,
+  "sources": ["e.g. Yahoo Finance", "CNBC", "Reuters"],
   "metrics": {
-    "sentiment": "Bullish" | "Bearish" | "Neutral",
-    "volatility": "Low" | "Medium" | "High",
-    "timeframe": "Short-term" | "Mid-term" | "Long-term"
+    "sentiment": "Bullish" or "Bearish" or "Neutral",
+    "volatility": "Low" or "Medium" or "High",
+    "timeframe": "Short-term" or "Mid-term" or "Long-term"
   }
 }`,
 
-  contrarian: `You are StockAI in CONTRARIAN MODE. Your purpose is to challenge consensus views and find overlooked risks or opportunities. You are skeptical of mainstream narratives.
+  contrarian: `You are StockAI in CONTRARIAN MODE with live web search. Search for the current price and the mainstream consensus view from recent news. Then argue AGAINST whatever the crowd believes using the live data you found.
 
-Rules:
-- If a user says a stock is good, present the statistical case AGAINST it
-- If a user asks about a hot trending stock, highlight mean-reversion risks
-- Always cite what the market is pricing in versus what fundamentals suggest
-- Express genuine uncertainty; markets are complex
-- Never just agree with popular sentiment
-
-Output EXACTLY this JSON structure (raw JSON only, no markdown):
+Respond with ONLY this raw JSON:
 {
-  "analysis": "3-4 sentence contrarian take that CHALLENGES conventional wisdom, citing specific metrics",
-  "bull_case": "Brief steelman of the bull case you are pushing back against",
-  "bear_case": "Your main contrarian argument with statistical support",
+  "price": "current live price string",
+  "analysis": "3-4 sentence contrarian take CHALLENGING the live consensus — cite specific headlines",
+  "bull_case": "Brief steelman of the consensus from recent news",
+  "bear_case": "Your contrarian counter-argument with live data",
   "confidence": <integer 35-75>,
-  "signal": "BUY" | "SELL" | "HOLD",
+  "signal": "BUY" or "SELL" or "HOLD",
   "is_contrarian": true,
+  "sources": ["source1", "source2"],
   "metrics": {
-    "sentiment": "Bullish" | "Bearish" | "Neutral",
-    "volatility": "Low" | "Medium" | "High",
-    "timeframe": "Short-term" | "Mid-term" | "Long-term"
+    "sentiment": "Bullish" or "Bearish" or "Neutral",
+    "volatility": "Low" or "Medium" or "High",
+    "timeframe": "Short-term" or "Mid-term" or "Long-term"
   }
 }`,
 
-  debate: `You are StockAI in BULL/BEAR DEBATE MODE. You simultaneously argue both sides of every stock thesis with equal rigor.
+  debate: `You are StockAI in BULL/BEAR DEBATE MODE with live web search. Search for the current price, latest news, and analyst opinions. Build BOTH sides using only live data.
 
-Output EXACTLY this JSON structure (raw JSON only):
+Respond with ONLY this raw JSON:
 {
-  "analysis": "2-sentence neutral framing of the key debate",
-  "bull_case": "3-4 sentence passionate bull argument with specific metrics, catalysts, and price targets",
-  "bear_case": "3-4 sentence passionate bear argument with specific risks, valuation concerns, and downside scenarios",
+  "price": "current live price string",
+  "analysis": "2-sentence neutral framing of the live debate happening right now",
+  "bull_case": "3-4 sentence bull argument built entirely from live news, catalysts, and data",
+  "bear_case": "3-4 sentence bear argument from live risks, headlines, and valuation data",
   "confidence": <integer 40-60>,
   "signal": "HOLD",
   "is_contrarian": false,
+  "sources": ["source1", "source2"],
   "metrics": {
     "sentiment": "Neutral",
-    "volatility": "Medium" | "High",
+    "volatility": "Medium",
     "timeframe": "Mid-term"
   }
 }`
 };
 
-/* ── GROQ API CALL ── */
+/* ── GROQ API CALL — uses compound-beta for live web search ── */
 async function callGroq(userMsg) {
-  // Detect file:// protocol — fetch is blocked by browsers in this context
   if (location.protocol === 'file:') {
-    throw new Error('Open this file via a server, not file://. Use VS Code Live Server, or upload to GitHub Pages.');
+    throw new Error('Open via a server (GitHub Pages or VS Code Live Server), not file://');
   }
 
   history.push({ role: "user", content: userMsg });
@@ -531,82 +554,102 @@ async function callGroq(userMsg) {
         "Authorization": `Bearer ${API_KEY}`
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
+        model: "compound-beta",
         messages: [
           { role: "system", content: PROMPTS[mode] },
           ...history
         ],
-        temperature: mode === 'contrarian' ? 0.85 : 0.7,
-        max_tokens: 700
+        temperature: mode === 'contrarian' ? 0.8 : 0.65,
+        max_tokens: 900
       })
     });
   } catch (networkErr) {
-    throw new Error('Network blocked. If you see this on GitHub Pages, your key may be expired. Get a new one at console.groq.com');
+    throw new Error('Network error. Check your internet connection or API key at console.groq.com');
   }
 
   const data = await res.json();
 
   if (data.error) {
     const msg = data.error.message || JSON.stringify(data.error);
-    if (res.status === 401) throw new Error('Invalid API key. Get a new one at console.groq.com/keys');
-    if (res.status === 429) throw new Error('Rate limit hit. Wait 30 seconds and try again, or upgrade your Groq plan.');
+    if (res.status === 401) throw new Error('Invalid API key — get a new one at console.groq.com/keys');
+    if (res.status === 429) throw new Error('Rate limit hit. Wait 30 seconds and try again.');
+    if (res.status === 404) throw new Error('Model not found. Your Groq key may not have access to compound-beta yet.');
     throw new Error(msg);
   }
 
-  const text = data.choices[0].message.content;
+  // compound-beta returns executed_tools in the message — grab them for source display
+  const msg = data.choices[0].message;
+  const text = msg.content || '';
+  const tools = msg.executed_tools || [];
+
   history.push({ role: "assistant", content: text });
-  return text;
+  return { text, tools };
 }
 
 /* ── PARSE RESPONSE ── */
 function parseResponse(raw) {
   try {
     const cleaned = raw.replace(/```json|```/g, '').trim();
-    return JSON.parse(cleaned);
+    // Find JSON object in the string
+    const start = cleaned.indexOf('{');
+    const end = cleaned.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('No JSON found');
+    return JSON.parse(cleaned.slice(start, end + 1));
   } catch {
-    // Fallback: extract signal manually
     const sig = raw.match(/SIGNAL:\s*(BUY|SELL|HOLD)/i);
     return {
-      analysis: raw.replace(/SIGNAL:.*/gi,'').trim(),
+      price: 'N/A',
+      analysis: raw.replace(/SIGNAL:.*/gi,'').trim().slice(0, 400),
       bull_case: '',
       bear_case: '',
-      confidence: 55,
+      confidence: 50,
       signal: sig ? sig[1].toUpperCase() : 'HOLD',
       is_contrarian: false,
+      sources: [],
       metrics: { sentiment: 'Neutral', volatility: 'Medium', timeframe: 'Mid-term' }
     };
   }
 }
 
 /* ── BUILD CARD HTML ── */
-function buildCard(d) {
+function buildCard(d, tools) {
   const sigClass = (d.signal || 'HOLD').toLowerCase();
   const sigIcons = { BUY: '▲', SELL: '▼', HOLD: '◆' };
   const sig = d.signal || 'HOLD';
 
-  const confColor =
-    d.confidence >= 70 ? '#10b981' :
-    d.confidence >= 50 ? '#f59e0b' : '#ef4444';
-
-  const sentColor =
-    d.metrics?.sentiment === 'Bullish' ? '#34d399' :
-    d.metrics?.sentiment === 'Bearish' ? '#f87171' : '#94a3b8';
+  const confColor = d.confidence >= 70 ? '#10b981' : d.confidence >= 50 ? '#f59e0b' : '#ef4444';
+  const sentColor = d.metrics?.sentiment === 'Bullish' ? '#34d399' :
+                    d.metrics?.sentiment === 'Bearish' ? '#f87171' : '#94a3b8';
 
   const contrFlag = d.is_contrarian
-    ? `<div class="contrarian-flag">⚡ Contrarian View — challenges consensus</div>` : '';
+    ? `<div class="contrarian-flag">⚡ Contrarian — challenges consensus</div>` : '';
+
+  // Live price badge
+  const priceBadge = d.price && d.price !== 'N/A'
+    ? `<div class="price-badge">${escHtml(d.price)}</div>` : '';
+
+  // Sources from AI response + tool calls
+  const allSources = [...(d.sources || [])];
+  if (tools && tools.length) {
+    tools.forEach(t => {
+      try {
+        const args = JSON.parse(t.arguments || '{}');
+        if (args.query) allSources.push('🔍 Searched: ' + args.query);
+      } catch {}
+    });
+  }
+  const sourcesHtml = allSources.length
+    ? `<div class="card-section">
+        <div class="card-label">Live Sources Used</div>
+        <div class="sources-list">${allSources.map(s => `<span class="source-tag">${escHtml(s)}</span>`).join('')}</div>
+      </div>` : '';
 
   const debateSection = (mode === 'debate' && d.bull_case && d.bear_case)
     ? `<div class="card-section">
-        <div class="card-label">Bull vs Bear Debate</div>
+        <div class="card-label">Live Bull vs Bear Debate</div>
         <div class="debate-row">
-          <div class="debate-side bull">
-            <span class="debate-side-label">▲ Bull Case</span>
-            ${escHtml(d.bull_case)}
-          </div>
-          <div class="debate-side bear">
-            <span class="debate-side-label">▼ Bear Case</span>
-            ${escHtml(d.bear_case)}
-          </div>
+          <div class="debate-side bull"><span class="debate-side-label">▲ Bull</span>${escHtml(d.bull_case)}</div>
+          <div class="debate-side bear"><span class="debate-side-label">▼ Bear</span>${escHtml(d.bear_case)}</div>
         </div>
       </div>`
     : (d.bull_case || d.bear_case)
@@ -621,56 +664,43 @@ function buildCard(d) {
     <div class="analysis-card">
       <div class="card-section">
         ${contrFlag}
-        <div class="card-label">Analysis</div>
+        ${priceBadge}
+        <div class="card-label" style="margin-top:${priceBadge?'8px':'0'}">Live Analysis</div>
         <div style="color:var(--text);line-height:1.6;font-size:12.5px">${escHtml(d.analysis)}</div>
-        <span class="signal ${sigClass}">${sigIcons[sig] || '◆'} ${sig}</span>
+        <span class="signal ${sigClass}">${sigIcons[sig]||'◆'} ${sig}</span>
       </div>
       ${debateSection}
       <div class="card-section">
-        <div class="card-label">Confidence Level</div>
+        <div class="card-label">Confidence</div>
         <div class="conf-bar-wrap">
-          <div class="conf-bar-track">
-            <div class="conf-bar-fill" style="width:${d.confidence}%;background:${confColor}"></div>
-          </div>
+          <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${d.confidence}%;background:${confColor}"></div></div>
           <div class="conf-val" style="color:${confColor}">${d.confidence}%</div>
         </div>
       </div>
       <div class="card-section">
-        <div class="card-label">Statistical Snapshot</div>
+        <div class="card-label">Snapshot</div>
         <div class="metrics-grid">
-          <div class="metric-box">
-            <span class="metric-val" style="color:${sentColor}">${d.metrics?.sentiment || 'N/A'}</span>
-            <div class="metric-lbl">Sentiment</div>
-          </div>
-          <div class="metric-box">
-            <span class="metric-val">${d.metrics?.volatility || 'N/A'}</span>
-            <div class="metric-lbl">Volatility</div>
-          </div>
-          <div class="metric-box">
-            <span class="metric-val" style="font-size:10px">${d.metrics?.timeframe || 'N/A'}</span>
-            <div class="metric-lbl">Timeframe</div>
-          </div>
+          <div class="metric-box"><span class="metric-val" style="color:${sentColor}">${d.metrics?.sentiment||'N/A'}</span><div class="metric-lbl">Sentiment</div></div>
+          <div class="metric-box"><span class="metric-val">${d.metrics?.volatility||'N/A'}</span><div class="metric-lbl">Volatility</div></div>
+          <div class="metric-box"><span class="metric-val" style="font-size:10px">${d.metrics?.timeframe||'N/A'}</span><div class="metric-lbl">Timeframe</div></div>
         </div>
       </div>
+      ${sourcesHtml}
     </div>`;
 }
 
 function escHtml(str) {
-  return String(str || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
 }
 
 /* ── DOM HELPERS ── */
-function addMsg(role, htmlContent) {
+function addMsg(role, html) {
   const wrap = document.getElementById('messages');
   const d = document.createElement('div');
   d.className = `msg ${role}`;
-  d.innerHTML = `<div class="msg-label">${role==='user'?'You':'StockAI v2'}</div>
-                 <div class="bubble">${htmlContent}</div>`;
+  d.innerHTML = `<div class="msg-label">${role==='user'?'You':'StockAI Live'}</div><div class="bubble">${html}</div>`;
   wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
-  return d;
 }
 
 function addBotCard(bubbleHtml, cardHtml) {
@@ -678,20 +708,22 @@ function addBotCard(bubbleHtml, cardHtml) {
   const d = document.createElement('div');
   d.className = 'msg bot';
   d.style.maxWidth = '100%';
-  d.innerHTML = `<div class="msg-label">StockAI v2</div>
-                 <div class="bubble">${bubbleHtml}</div>
-                 ${cardHtml}`;
+  d.innerHTML = `<div class="msg-label">StockAI Live</div><div class="bubble">${bubbleHtml}</div>${cardHtml}`;
   wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
 }
 
-function showTyping() {
+function showTyping(searching) {
   const wrap = document.getElementById('messages');
   const d = document.createElement('div');
   d.id = 'typing-ind';
   d.className = 'msg bot';
-  d.innerHTML = `<div class="msg-label">StockAI v2</div>
-    <div class="bubble"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  const label = searching ? '🔍 Searching live data...' : '';
+  d.innerHTML = `<div class="msg-label">StockAI Live</div>
+    <div class="bubble">
+      ${label ? `<div style="font-size:11px;color:var(--muted);margin-bottom:6px;font-family:var(--mono)">${label}</div>` : ''}
+      <div class="typing"><span></span><span></span><span></span></div>
+    </div>`;
   wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
 }
@@ -707,27 +739,24 @@ async function sendMessage() {
   const btn   = document.getElementById('send-btn');
   const text  = input.value.trim();
   if (!text) return;
-
   input.value = '';
   btn.disabled = true;
   addMsg('user', escHtml(text));
-  showTyping();
+  showTyping(true);
 
   try {
-    const raw  = await callGroq(text);
+    const { text: raw, tools } = await callGroq(text);
     const data = parseResponse(raw);
     removeTyping();
-
     const modeLabels = {
-      standard:   'Here\'s my analysis:',
-      contrarian: '⚡ Contrarian take — challenging the consensus:',
-      debate:     '⚖️ Both sides of the debate:'
+      standard:   '📡 Live analysis:',
+      contrarian: '⚡ Contrarian take on live data:',
+      debate:     '⚖️ Live bull vs bear:'
     };
-
-    addBotCard(modeLabels[mode], buildCard(data));
+    addBotCard(modeLabels[mode], buildCard(data, tools));
   } catch(e) {
     removeTyping();
-    addMsg('bot', `<span style="color:#f87171">Error: ${escHtml(e.message)}</span>`);
+    addMsg('bot', `<span style="color:#f87171">⚠ ${escHtml(e.message)}</span>`);
     console.error(e);
   }
 
@@ -740,16 +769,11 @@ function sendChip(t) {
   sendMessage();
 }
 
-/* ── MODE ── */
 function setMode(m) {
   mode = m;
   ['standard','contrarian','debate'].forEach(k => {
     document.getElementById('btn-'+k).classList.toggle('active', k===m);
   });
-}
-</script>
-</body>
-</html>
 }
 </script>
 </body>
