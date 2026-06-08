@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>StockAI — Full Analysis Suite</title>
+<title>StockAI — Free Analysis Suite</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#0a0e14;--bg2:#0f1520;--bg3:#151d2e;
   --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.12);
   --text:#e2e8f0;--muted:#64748b;
-  --accent:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;
+  --accent:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;
   --mono:'IBM Plex Mono',monospace;--sans:'IBM Plex Sans',sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -18,22 +18,43 @@ body{font-family:var(--sans);background:var(--bg);min-height:100vh;display:flex;
 body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(59,130,246,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.03) 1px,transparent 1px);background-size:32px 32px;pointer-events:none;}
 #app{width:100%;max-width:600px;display:flex;flex-direction:column;height:calc(100vh - 32px);max-height:860px;border:1px solid var(--border2);border-radius:16px;overflow:hidden;background:var(--bg2);}
 
+/* SETUP SCREEN */
+#setup-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:32px 24px;text-align:center;gap:16px;}
+#setup-screen h3{font-size:16px;font-weight:600;color:var(--text);}
+#setup-screen p{font-size:13px;color:var(--muted);line-height:1.7;max-width:380px;}
+.setup-steps{background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:16px;text-align:left;width:100%;max-width:400px;}
+.setup-step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border);}
+.setup-step:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-family:var(--mono);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.step-text{font-size:12.5px;color:var(--text);line-height:1.6;}
+.step-text a{color:var(--accent);text-decoration:none;}
+.step-text a:hover{text-decoration:underline;}
+.key-input-wrap{display:flex;gap:8px;width:100%;max-width:400px;}
+#api-key-input{flex:1;padding:10px 13px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-family:var(--mono);font-size:12px;outline:none;}
+#api-key-input:focus{border-color:var(--accent);}
+#api-key-input::placeholder{color:var(--muted);}
+#start-btn{padding:10px 18px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+#start-btn:hover{opacity:.9;}
+.free-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#34d399;font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:99px;}
+
 /* HEADER */
-#header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg3);flex-shrink:0;}
+#header{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--bg3);flex-shrink:0;display:none;}
 .logo-mark{width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:600;color:#fff;flex-shrink:0;}
 #header h2{font-size:14px;font-weight:600;color:var(--text);}
 #header .sub{font-size:10px;color:var(--muted);font-family:var(--mono);}
 .live-dot{width:6px;height:6px;border-radius:50%;background:var(--green);margin-left:auto;box-shadow:0 0 6px var(--green);animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+#key-change-btn{font-family:var(--mono);font-size:10px;color:var(--muted);background:none;border:none;cursor:pointer;padding:2px 6px;border-radius:4px;}
+#key-change-btn:hover{background:var(--bg);color:var(--text);}
 
 /* CHIPS */
-#chips{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
+#chips{display:flex;gap:6px;padding:8px 14px;border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0;display:none;}
 #chips::-webkit-scrollbar{display:none;}
 .chip{font-size:11px;font-family:var(--mono);padding:5px 10px;border-radius:99px;border:1px solid var(--border2);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .15s;}
 .chip:hover{background:var(--bg3);color:var(--text);border-color:var(--accent);}
 
 /* MESSAGES */
-#messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;}
+#messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:14px;scroll-behavior:smooth;display:none;}
 #messages::-webkit-scrollbar{width:3px;}
 #messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .msg{display:flex;flex-direction:column;max-width:94%;}
@@ -49,45 +70,32 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .card-section{padding:10px 12px;border-bottom:1px solid var(--border);}
 .card-section:last-child{border-bottom:none;}
 .card-label{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;}
-
-/* Price */
 .price-hero{display:flex;align-items:baseline;gap:10px;margin-bottom:8px;}
 .price-main{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--text);}
-.price-change-up{font-family:var(--mono);font-size:13px;color:var(--green);}
-.price-change-dn{font-family:var(--mono);font-size:13px;color:var(--red);}
-
-/* Signal */
+.price-up{font-family:var(--mono);font-size:13px;color:var(--green);}
+.price-dn{font-family:var(--mono);font-size:13px;color:var(--red);}
 .signal{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;font-weight:600;padding:5px 12px;border-radius:99px;margin-top:8px;letter-spacing:.06em;text-transform:uppercase;}
 .signal.buy{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);}
 .signal.sell{background:rgba(239,68,68,.15);color:#f87171;border:1px solid rgba(239,68,68,.3);}
 .signal.hold{background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3);}
-
-/* Confidence */
 .conf-bar-wrap{display:flex;align-items:center;gap:8px;}
 .conf-bar-track{flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
 .conf-bar-fill{height:100%;border-radius:99px;}
 .conf-val{font-family:var(--mono);font-size:11px;min-width:32px;text-align:right;}
-
-/* Price targets */
 .targets-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;}
 .target-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
-.target-box.entry{border-color:rgba(59,130,246,.3);}
-.target-box.tp{border-color:rgba(16,185,129,.3);}
-.target-box.sl{border-color:rgba(239,68,68,.3);}
 .target-val{font-family:var(--mono);font-size:14px;font-weight:600;display:block;margin-bottom:2px;}
 .target-val.entry{color:#93c5fd;}
 .target-val.tp{color:#34d399;}
 .target-val.sl{color:#f87171;}
 .target-lbl{font-size:10px;color:var(--muted);}
-.rr-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#c4b5fd;margin-top:6px;}
-
-/* TA */
+.rr-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:5px;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.25);color:#c4b5fd;margin-top:6px;margin-right:4px;}
 .ta-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px;}
-.ta-indicator{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
-.ta-ind-name{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
-.ta-ind-val{font-family:var(--mono);font-size:14px;font-weight:600;}
-.ta-ind-note{font-size:10px;color:var(--muted);margin-top:2px;}
-.ta-bar-track{height:4px;background:var(--border);border-radius:99px;margin-top:5px;overflow:hidden;}
+.ta-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+.ta-name{font-family:var(--mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.ta-val{font-family:var(--mono);font-size:14px;font-weight:600;}
+.ta-note{font-size:10px;color:var(--muted);margin-top:2px;}
+.ta-bar{height:4px;background:var(--border);border-radius:99px;margin-top:5px;overflow:hidden;}
 .ta-bar-fill{height:100%;border-radius:99px;}
 .ta-zones{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:2px;}
 .ma-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
@@ -96,80 +104,93 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .ma-pill.below{background:rgba(239,68,68,.08);border-color:rgba(239,68,68,.2);color:#fca5a5;}
 .levels-row{display:flex;gap:6px;margin-top:4px;}
 .level-box{flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;text-align:center;}
-.level-val{font-family:var(--mono);font-size:13px;font-weight:600;}
-.level-val.support{color:#34d399;}
-.level-val.resist{color:#f87171;}
-.level-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
-.ta-overall-badge{font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:.06em;display:inline-block;margin-top:4px;}
+.lv-val{font-family:var(--mono);font-size:13px;font-weight:600;}
+.lv-val.sup{color:#34d399;}
+.lv-val.res{color:#f87171;}
+.lv-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
+.ta-badge{font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:99px;display:inline-block;margin-top:4px;}
 .strong-buy{background:rgba(16,185,129,.2);color:#34d399;border:1px solid rgba(16,185,129,.35);}
-.buy-badge{background:rgba(16,185,129,.1);color:#6ee7b7;border:1px solid rgba(16,185,129,.2);}
-.neutral-badge{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2);}
-.sell-badge{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.2);}
+.buy-b{background:rgba(16,185,129,.1);color:#6ee7b7;border:1px solid rgba(16,185,129,.2);}
+.neutral-b{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.2);}
+.sell-b{background:rgba(239,68,68,.1);color:#fca5a5;border:1px solid rgba(239,68,68,.2);}
 .strong-sell{background:rgba(239,68,68,.2);color:#f87171;border:1px solid rgba(239,68,68,.35);}
-
-/* Sentiment */
-.sentiment-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;}
+.sent-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:6px;}
 .sent-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
-.sent-emoji{font-size:18px;display:block;margin-bottom:4px;}
-.sent-label{font-family:var(--mono);font-size:11px;font-weight:600;}
-.sent-sublabel{font-size:10px;color:var(--muted);margin-top:2px;}
-.sent-bar-track{height:4px;background:var(--border);border-radius:99px;margin-top:6px;overflow:hidden;}
+.sent-icon{font-size:16px;display:block;margin-bottom:4px;}
+.sent-val{font-family:var(--mono);font-size:11px;font-weight:600;}
+.sent-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.sent-bar{height:4px;background:var(--border);border-radius:99px;margin-top:6px;overflow:hidden;}
 .sent-bar-fill{height:100%;border-radius:99px;}
-
-/* Analyst */
-.analyst-row{display:flex;gap:6px;margin-top:6px;align-items:center;}
-.analyst-pill{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:99px;}
-.analyst-pill.strong-buy{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);}
-.analyst-pill.buy{background:rgba(16,185,129,.08);color:#6ee7b7;border:1px solid rgba(16,185,129,.15);}
-.analyst-pill.hold{background:rgba(245,158,11,.08);color:#fbbf24;border:1px solid rgba(245,158,11,.15);}
-.analyst-pill.sell{background:rgba(239,68,68,.08);color:#fca5a5;border:1px solid rgba(239,68,68,.15);}
-.analyst-target{font-family:var(--mono);font-size:12px;color:var(--accent);margin-left:auto;}
-
-/* Contrarian flag */
-.contrarian-flag{display:inline-flex;align-items:center;gap:5px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.25);color:#fcd34d;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:5px;margin-bottom:6px;text-transform:uppercase;}
-
-/* Sources */
-.sources-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
-.source-tag{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;background:rgba(255,255,255,.04);border:1px solid var(--border);color:var(--muted);}
-
-/* Chart link */
-.chart-link{display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;font-family:var(--mono);font-size:11px;color:var(--accent);text-decoration:none;border-top:1px solid var(--border);}
-.chart-link:hover{background:var(--bg3);}
-
-/* Metrics */
+.analyst-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.a-pill{font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:99px;}
+.a-pill.strong-buy{background:rgba(16,185,129,.15);color:#34d399;border:1px solid rgba(16,185,129,.3);}
+.a-pill.buy{background:rgba(16,185,129,.08);color:#6ee7b7;border:1px solid rgba(16,185,129,.15);}
+.a-pill.hold{background:rgba(245,158,11,.08);color:#fbbf24;border:1px solid rgba(245,158,11,.15);}
+.a-pill.sell{background:rgba(239,68,68,.08);color:#fca5a5;border:1px solid rgba(239,68,68,.15);}
+.a-target{font-family:var(--mono);font-size:12px;color:var(--accent);margin-left:auto;}
+.a-changes{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
+.a-cases{display:flex;gap:6px;margin-top:8px;}
+.a-case{flex:1;border-radius:7px;padding:6px 8px;font-size:11px;line-height:1.5;}
+.a-case.bull{background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);color:#a7f3d0;}
+.a-case.bear{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);color:#fecaca;}
+.a-case-label{font-family:var(--mono);font-size:10px;font-weight:600;display:block;margin-bottom:3px;}
 .metrics-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:4px;}
 .metric-box{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;text-align:center;}
 .metric-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--text);display:block;}
 .metric-lbl{font-size:10px;color:var(--muted);margin-top:2px;}
-
-/* Typing */
 .typing{display:flex;gap:5px;padding:8px 0;align-items:center;}
 .typing span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite ease-in-out;}
 .typing span:nth-child(2){animation-delay:.2s;}
 .typing span:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-.searching-label{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:6px;}
-
-/* INPUT */
-#input-row{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--border);background:var(--bg3);flex-shrink:0;}
+.searching-lbl{font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:6px;}
+#input-row{display:flex;gap:8px;padding:11px 14px;border-top:1px solid var(--border);background:var(--bg3);flex-shrink:0;display:none;}
 #user-input{flex:1;padding:9px 13px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color .15s;}
 #user-input::placeholder{color:var(--muted);}
 #user-input:focus{border-color:var(--accent);}
-#send-btn{padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:opacity .15s,transform .1s;}
+#send-btn{padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:opacity .15s;}
 #send-btn:hover{opacity:.9;}
-#send-btn:active{transform:scale(.97);}
 #send-btn:disabled{opacity:.35;cursor:default;}
 .disclaimer{font-size:10px;font-family:var(--mono);color:var(--muted);text-align:center;padding:7px 14px;background:var(--bg2);border-top:1px solid var(--border);flex-shrink:0;}
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- SETUP SCREEN -->
+  <div id="setup-screen">
+    <div class="free-badge">✓ 100% Free — No Credit Card</div>
+    <h3>StockAI Full Suite</h3>
+    <p>Uses <strong>Google Gemini API</strong> — free tier gives you <strong>1,500 requests/day</strong> with no credit card and no expiry. Get your free key in 30 seconds:</p>
+    <div class="setup-steps">
+      <div class="setup-step">
+        <div class="step-num">1</div>
+        <div class="step-text">Go to <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a> and sign in with your Google account</div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">2</div>
+        <div class="step-text">Click <strong>"Create API key"</strong> → copy the key that appears (starts with <code style="font-family:var(--mono);font-size:11px">AIza...</code>)</div>
+      </div>
+      <div class="setup-step">
+        <div class="step-num">3</div>
+        <div class="step-text">Paste it below and click Start</div>
+      </div>
+    </div>
+    <div class="key-input-wrap">
+      <input id="api-key-input" type="password" placeholder="Paste your Gemini API key (AIza...)" />
+      <button id="start-btn" onclick="startApp()">Start →</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted)">Your key is stored only in your browser — never sent anywhere except Google's API.</p>
+  </div>
+
+  <!-- MAIN APP (hidden until key entered) -->
   <div id="header">
     <div class="logo-mark">AI</div>
     <div>
       <h2>StockAI Full Suite</h2>
-      <div class="sub">Technical · Sentiment · Analyst · Price Targets</div>
+      <div class="sub">Gemini · Free · Technical + Sentiment + Analyst</div>
     </div>
+    <button id="key-change-btn" onclick="changeKey()">change key</button>
     <div class="live-dot"></div>
   </div>
 
@@ -181,51 +202,34 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <div class="chip" onclick="sendChip('Full analysis SPY')">SPY</div>
     <div class="chip" onclick="sendChip('Full analysis META')">META</div>
     <div class="chip" onclick="sendChip('Full analysis BTC-USD')">BTC</div>
+    <div class="chip" onclick="sendChip('Full analysis AMZN')">AMZN</div>
   </div>
 
-  <div id="messages">
-    <div class="msg bot">
-      <div class="msg-label">StockAI</div>
-      <div class="bubble">
-        Welcome to <strong>StockAI Full Suite</strong>. Ask about any ticker and I'll search the web for:<br><br>
-        📡 Live price &amp; technical indicators (RSI, MACD, MAs)<br>
-        🐦 Twitter/X &amp; social sentiment<br>
-        🏦 Wall Street analyst ratings &amp; price targets<br>
-        🎯 Recommended buy entry, take profit &amp; stop loss prices<br><br>
-        Try: <strong>"Full analysis NVDA"</strong>
-      </div>
-    </div>
-  </div>
+  <div id="messages"></div>
 
   <div id="input-row">
     <input id="user-input" type="text" placeholder="Enter any ticker, e.g. AAPL..." onkeydown="if(event.key==='Enter')sendMessage()" />
     <button id="send-btn" onclick="sendMessage()">SEND</button>
   </div>
-  <div class="disclaimer">⚠ Educational only — not financial advice. Always do your own research.</div>
+  <div class="disclaimer">⚠ Educational only. Not financial advice. Always do your own research.</div>
 </div>
 
 <script>
-const API_KEY = "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";
+let API_KEY = '';
 const history = [];
 
-const SYSTEM_PROMPT = `You are StockAI, a professional stock analyst. Use your training knowledge of financial markets to provide detailed analysis. Be specific with numbers — use realistic values based on known data for each ticker.
+/* ─── SYSTEM PROMPT ─── */
+const SYSTEM_PROMPT = `You are StockAI, a professional quantitative stock analyst. When asked about any ticker, provide a complete structured analysis using your financial knowledge. Use realistic, specific numbers based on your knowledge of each company.
 
-For any ticker the user asks about, fill in ALL fields with realistic, specific data:
-- Use real-world knowledge of RSI ranges, moving averages, analyst consensus, and typical price target ranges for major stocks
-- For social sentiment, reflect the general known sentiment around the stock (e.g. TSLA is heavily discussed on Twitter/Reddit)
-- Calculate entry/take profit/stop loss based on realistic support & resistance levels
-- Always give a specific price for every number field — never return null for major tickers
-
-Respond with ONLY this raw JSON, no markdown, no extra text, no backticks:
+Respond ONLY with raw JSON, no markdown, no backticks, no extra text:
 {
   "ticker": "NVDA",
   "price": "142.50",
   "price_change": "+2.3%",
-  "analysis": "3-4 sentence summary combining technical picture, sentiment, and analyst view into a clear thesis",
+  "analysis": "3-4 sentence summary with specific metrics, recent catalysts, and clear investment thesis",
   "signal": "BUY",
-  "confidence": 72,
-  "is_contrarian": false,
-  "sources": ["Yahoo Finance", "Finviz", "Wall Street consensus"],
+  "confidence": 74,
+  "sources": ["Finviz", "Wall Street consensus", "Yahoo Finance"],
   "price_targets": {
     "entry": 140.00,
     "take_profit": 165.00,
@@ -253,10 +257,10 @@ Respond with ONLY this raw JSON, no markdown, no extra text, no backticks:
   "sentiment": {
     "twitter_x": "Bullish",
     "twitter_x_score": 71,
-    "twitter_x_note": "Strong retail enthusiasm, trending with AI theme",
+    "twitter_x_note": "Strong retail enthusiasm driven by AI narrative",
     "reddit": "Bullish",
     "reddit_score": 68,
-    "reddit_note": "WSB and r/stocks both positive on AI catalyst",
+    "reddit_note": "Active discussion in r/stocks and r/wallstreetbets",
     "overall_social": "Bullish"
   },
   "analysts": {
@@ -264,8 +268,8 @@ Respond with ONLY this raw JSON, no markdown, no extra text, no backticks:
     "avg_price_target": 165.00,
     "num_analysts": 42,
     "recent_changes": "Goldman Sachs reiterated Buy, Citi raised PT to $170",
-    "bull_case": "AI data center demand remains robust with no signs of slowdown",
-    "bear_case": "Valuation stretched at 35x forward earnings; China export risk remains"
+    "bull_case": "AI data center demand remains robust with multi-year tailwinds",
+    "bear_case": "Valuation stretched at 35x forward earnings; China export restrictions remain a risk"
   },
   "metrics": {
     "sentiment": "Bullish",
@@ -274,144 +278,74 @@ Respond with ONLY this raw JSON, no markdown, no extra text, no backticks:
   }
 }`;
 
-/* ── API CALL ── */
-// Use llama-3.3-70b-versatile — Groq's highest free-tier rate limit
-// compound-beta is too rate-limited on free tier; we simulate live data
-// by injecting a web-search context step first using the fast model
-const PRIMARY_MODEL = 'llama-3.3-70b-versatile';
+/* ─── GEMINI API CALL ─── */
+async function callGemini(userMsg) {
+  history.push({ role: "user", parts: [{ text: userMsg }] });
+  const trimmed = history.slice(-6); // keep last 6 turns
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  const body = {
+    system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: trimmed,
+    generationConfig: { temperature: 0.65, maxOutputTokens: 1200 }
+  };
 
-async function groqCall(model, messages, maxTokens=1200) {
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer ${API_KEY}` },
-    body: JSON.stringify({ model, messages, temperature: 0.65, max_tokens: maxTokens })
-  });
-  return { res, data: await res.json() };
-}
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+    { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }
+  );
 
-async function callGroq(userMsg) {
-  if (location.protocol === 'file:') throw new Error('Open via GitHub Pages or VS Code Live Server, not file://');
+  const data = await res.json();
 
-  history.push({ role: "user", content: userMsg });
-  const trimmed = history.slice(-4);
-
-  // Step 1: Ask the model to generate realistic live-style data
-  // (compound-beta is rate-limited; llama has 6000 req/day free)
-  const messages = [{ role: "system", content: SYSTEM_PROMPT }, ...trimmed];
-
-  let lastErr = '';
-  // Try up to 3 times with backoff (handles transient 429s)
-  for (let attempt = 0; attempt < 3; attempt++) {
-    if (attempt > 0) {
-      updateTypingLabel(`Rate limited — retrying in ${attempt * 15}s... (attempt ${attempt+1}/3)`);
-      await sleep(attempt * 15000);
-    }
-    try {
-      const { res, data } = await groqCall(PRIMARY_MODEL, messages);
-
-      if (res.status === 429) {
-        lastErr = 'Rate limited';
-        // Check for Retry-After header
-        const wait = parseInt(data?.error?.message?.match(/Please try again in ([\d.]+)s/)?.[1] || '15');
-        updateTypingLabel(`Rate limited — waiting ${Math.ceil(wait)}s then retrying...`);
-        await sleep((wait + 1) * 1000);
-        // one immediate retry after waiting
-        const retry = await groqCall(PRIMARY_MODEL, messages);
-        if (!retry.data.error) {
-          const msg = retry.data.choices[0].message;
-          history.push({ role: "assistant", content: (msg.content||'').slice(0, 500) });
-          return { text: msg.content||'', tools: [], modelUsed: PRIMARY_MODEL };
-        }
-        lastErr = retry.data.error?.message || 'Rate limited';
-        continue;
-      }
-      if (res.status === 401) throw new Error('Invalid API key — get a new one at console.groq.com/keys');
-      if (res.status === 413) { history.length = 0; throw new Error('Request too large — history cleared, try again'); }
-      if (data.error) { lastErr = data.error.message || JSON.stringify(data.error); continue; }
-
-      const msg = data.choices[0].message;
-      history.push({ role: "assistant", content: (msg.content||'').slice(0, 500) });
-      return { text: msg.content||'', tools: [], modelUsed: PRIMARY_MODEL };
-
-    } catch(e) {
-      if (e.message.includes('Invalid API key') || e.message.includes('history cleared')) throw e;
-      lastErr = e.message;
-    }
+  if (data.error) {
+    const msg = data.error.message || '';
+    if (res.status === 400 && msg.includes('API key')) throw new Error('Invalid API key. Get a free one at aistudio.google.com/app/apikey');
+    if (res.status === 429) throw new Error('Rate limit hit (15 requests/min on free tier). Wait 60 seconds and try again.');
+    if (res.status === 403) throw new Error('API key not authorized. Make sure you enabled the Gemini API in Google AI Studio.');
+    throw new Error(msg || `Error ${res.status}`);
   }
-  throw new Error(`Still rate limited after 3 attempts. Wait 1 min and try again. (${lastErr})`);
+
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  history.push({ role: "model", parts: [{ text: text.slice(0, 600) }] });
+  return text;
 }
 
-function updateTypingLabel(msg) {
-  const el = document.getElementById('typing-label');
-  if (el) el.textContent = msg;
-}
-
-/* ── PARSE ── */
+/* ─── PARSE ─── */
 function parseResponse(raw) {
   try {
-    const cleaned = raw.replace(/```json|```/g,'').trim();
-    const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
+    const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
     if (s === -1 || e === -1) throw new Error('no json');
-    return JSON.parse(cleaned.slice(s, e+1));
+    return JSON.parse(raw.slice(s, e + 1));
   } catch {
-    return { ticker:'?', price:'N/A', price_change:'', analysis:raw.slice(0,300), signal:'HOLD', confidence:50, is_contrarian:false, sources:[], price_targets:null, ta:null, sentiment:null, analysts:null, metrics:{sentiment:'Neutral',volatility:'Medium',timeframe:'Mid-term'} };
+    return { ticker:'?', price:'N/A', price_change:'', analysis: raw.slice(0,300), signal:'HOLD', confidence:50, sources:[], price_targets:null, ta:null, sentiment:null, analysts:null, metrics:{sentiment:'Neutral',volatility:'Medium',timeframe:'Mid-term'} };
   }
 }
 
-/* ── HELPERS ── */
+/* ─── HELPERS ─── */
 function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }
-function confColor(v){ return v>=70?'#10b981':v>=50?'#f59e0b':'#ef4444'; }
-function sentColor(s){ return s==='Bullish'?'#34d399':s==='Bearish'?'#f87171':'#94a3b8'; }
-function rsiColor(v){ return v>=70?'#ef4444':v<=30?'#10b981':'#f59e0b'; }
-function scoreToColor(n){ return n>=60?'#34d399':n>=40?'#f59e0b':'#f87171'; }
-function taOvClass(s){
-  const m = {'Strong Buy':'strong-buy','Buy':'buy-badge','Neutral':'neutral-badge','Sell':'sell-badge','Strong Sell':'strong-sell'};
-  return m[s]||'neutral-badge';
-}
+function cc(v){ return v>=70?'#10b981':v>=50?'#f59e0b':'#ef4444'; }
+function sc(s){ return s==='Bullish'?'#34d399':s==='Bearish'?'#f87171':'#94a3b8'; }
+function rsiCol(v){ return v>=70?'#ef4444':v<=30?'#10b981':'#f59e0b'; }
+function sCol(n){ return n>=60?'#34d399':n>=40?'#f59e0b':'#f87171'; }
+function taClass(s){ const m={'Strong Buy':'strong-buy','Buy':'buy-b','Neutral':'neutral-b','Sell':'sell-b','Strong Sell':'strong-sell'}; return m[s]||'neutral-b'; }
 
-/* ── BUILD CARD ── */
-function buildCard(d, tools) {
+/* ─── BUILD CARD ─── */
+function buildCard(d) {
   const sig = d.signal||'HOLD';
-  const sc = sentColor(d.metrics?.sentiment);
-  const cc = confColor(d.confidence||50);
-
-  // Parse price
   const priceNum = parseFloat(d.price)||0;
-  const changeUp = String(d.price_change||'').startsWith('+');
-  const changeClass = changeUp ? 'price-change-up' : 'price-change-dn';
+  const chUp = String(d.price_change||'').startsWith('+');
 
-  // Contrarian flag
-  const contrFlag = d.is_contrarian ? `<div class="contrarian-flag">⚡ Contrarian — challenges consensus</div>` : '';
-
-  // Sources
-  const allSrc = [...(d.sources||[])];
-  if(tools?.length) tools.forEach(t=>{ try{ const a=JSON.parse(t.arguments||'{}'); if(a.query) allSrc.push('🔍 '+a.query); }catch{} });
-  const srcHtml = allSrc.length ? `<div class="card-section"><div class="card-label">Live Sources</div><div class="sources-list">${allSrc.map(s=>`<span class="source-tag">${esc(s)}</span>`).join('')}</div></div>` : '';
-
-  // Price targets section
-  let targetsHtml = '';
-  if(d.price_targets) {
+  // Price targets
+  let ptHtml = '';
+  if (d.price_targets) {
     const pt = d.price_targets;
-    targetsHtml = `
-    <div class="card-section">
-      <div class="card-label">🎯 Recommended Price Targets</div>
+    ptHtml = `<div class="card-section">
+      <div class="card-label">🎯 Price Targets — Entry / Take Profit / Stop Loss</div>
       <div class="targets-grid">
-        <div class="target-box entry">
-          <span class="target-val entry">$${Number(pt.entry||0).toFixed(2)}</span>
-          <div class="target-lbl">Entry / Buy</div>
-        </div>
-        <div class="target-box tp">
-          <span class="target-val tp">$${Number(pt.take_profit||0).toFixed(2)}</span>
-          <div class="target-lbl">Take Profit</div>
-        </div>
-        <div class="target-box sl">
-          <span class="target-val sl">$${Number(pt.stop_loss||0).toFixed(2)}</span>
-          <div class="target-lbl">Stop Loss</div>
-        </div>
+        <div class="target-box"><span class="target-val entry">$${Number(pt.entry||0).toFixed(2)}</span><div class="target-lbl">Entry / Buy</div></div>
+        <div class="target-box"><span class="target-val tp">$${Number(pt.take_profit||0).toFixed(2)}</span><div class="target-lbl">Take Profit</div></div>
+        <div class="target-box"><span class="target-val sl">$${Number(pt.stop_loss||0).toFixed(2)}</span><div class="target-lbl">Stop Loss</div></div>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <div style="margin-top:8px">
         <span class="rr-badge">⚖ R/R ${esc(pt.risk_reward||'N/A')}</span>
         ${pt.upside_pct?`<span class="rr-badge" style="color:#34d399;border-color:rgba(16,185,129,.3)">▲ ${esc(pt.upside_pct)} upside</span>`:''}
         ${pt.downside_pct?`<span class="rr-badge" style="color:#f87171;border-color:rgba(239,68,68,.3)">▼ ${esc(pt.downside_pct)} risk</span>`:''}
@@ -419,156 +353,144 @@ function buildCard(d, tools) {
     </div>`;
   }
 
-  // TA section
+  // Technical analysis
   let taHtml = '';
-  if(d.ta) {
+  if (d.ta) {
     const ta = d.ta;
-    const rsiCol = rsiColor(ta.rsi||50);
-    const macdCol = ta.macd_bullish ? '#34d399' : '#f87171';
-    const volCol = ta.volume_vs_avg==='Above Average'?'#34d399':ta.volume_vs_avg==='Below Average'?'#f87171':'#94a3b8';
-    const trendCol = ta.trend==='Uptrend'?'#34d399':ta.trend==='Downtrend'?'#f87171':'#94a3b8';
-    const ma50cls = ta.price_vs_ma50==='Above'?'above':'below';
-    const ma200cls = ta.price_vs_ma200==='Above'?'above':'below';
-    const taOv = ta.ta_overall||'Neutral';
-    const chartUrl = d.ticker ? `https://finance.yahoo.com/chart/${d.ticker.toUpperCase()}` : '';
-
-    taHtml = `
-    <div class="card-section">
+    const rc = rsiCol(ta.rsi||50);
+    const mc = ta.macd_bullish?'#34d399':'#f87171';
+    const vc = ta.volume_vs_avg==='Above Average'?'#34d399':ta.volume_vs_avg==='Below Average'?'#f87171':'#94a3b8';
+    const tc = ta.trend==='Uptrend'?'#34d399':ta.trend==='Downtrend'?'#f87171':'#94a3b8';
+    taHtml = `<div class="card-section">
       <div class="card-label">⚡ Technical Indicators</div>
       <div class="ta-grid">
-        <div class="ta-indicator">
-          <div class="ta-ind-name">RSI (14)</div>
-          <div class="ta-ind-val" style="color:${rsiCol}">${ta.rsi!=null?Number(ta.rsi).toFixed(1):'N/A'}</div>
-          <div class="ta-ind-note">${esc(ta.rsi_signal||'')}</div>
-          <div class="ta-bar-track"><div class="ta-bar-fill" style="width:${Math.min(100,ta.rsi||50)}%;background:${rsiCol}"></div></div>
+        <div class="ta-box">
+          <div class="ta-name">RSI (14)</div>
+          <div class="ta-val" style="color:${rc}">${ta.rsi!=null?Number(ta.rsi).toFixed(1):'N/A'}</div>
+          <div class="ta-note">${esc(ta.rsi_signal||'')}</div>
+          <div class="ta-bar"><div class="ta-bar-fill" style="width:${Math.min(100,ta.rsi||50)}%;background:${rc}"></div></div>
           <div class="ta-zones"><span>0 OS 30</span><span>70 OB 100</span></div>
         </div>
-        <div class="ta-indicator">
-          <div class="ta-ind-name">MACD</div>
-          <div class="ta-ind-val" style="color:${macdCol}">${ta.macd_bullish?'▲ Bullish':'▼ Bearish'}</div>
-          <div class="ta-ind-note">${esc(ta.macd_note||'')}</div>
+        <div class="ta-box">
+          <div class="ta-name">MACD</div>
+          <div class="ta-val" style="color:${mc}">${ta.macd_bullish?'▲ Bullish':'▼ Bearish'}</div>
+          <div class="ta-note">${esc(ta.macd_note||'')}</div>
         </div>
-        <div class="ta-indicator">
-          <div class="ta-ind-name">Volume</div>
-          <div class="ta-ind-val" style="color:${volCol}">${esc(ta.volume_vs_avg||'N/A')}</div>
-          <div class="ta-ind-note">${esc(ta.volume_note||'')}</div>
+        <div class="ta-box">
+          <div class="ta-name">Volume</div>
+          <div class="ta-val" style="color:${vc}">${esc(ta.volume_vs_avg||'N/A')}</div>
+          <div class="ta-note">${esc(ta.volume_note||'')}</div>
         </div>
-        <div class="ta-indicator">
-          <div class="ta-ind-name">Trend</div>
-          <div class="ta-ind-val" style="color:${trendCol}">${esc(ta.trend||'N/A')}</div>
-          <div class="ta-ind-note">Overall direction</div>
+        <div class="ta-box">
+          <div class="ta-name">Trend</div>
+          <div class="ta-val" style="color:${tc}">${esc(ta.trend||'N/A')}</div>
+          <div class="ta-note">Overall direction</div>
         </div>
       </div>
-      <div style="margin-top:8px;">
+      <div style="margin-top:8px">
         <div class="card-label" style="margin-bottom:4px">Moving Averages</div>
         <div class="ma-row">
-          <span class="ma-pill ${ma50cls}">50D $${ta.ma50!=null?Number(ta.ma50).toFixed(2):'N/A'} (${esc(ta.price_vs_ma50||'?')})</span>
-          <span class="ma-pill ${ma200cls}">200D $${ta.ma200!=null?Number(ta.ma200).toFixed(2):'N/A'} (${esc(ta.price_vs_ma200||'?')})</span>
+          <span class="ma-pill ${ta.price_vs_ma50==='Above'?'above':'below'}">MA50 $${ta.ma50!=null?Number(ta.ma50).toFixed(2):'N/A'} (${esc(ta.price_vs_ma50||'?')})</span>
+          <span class="ma-pill ${ta.price_vs_ma200==='Above'?'above':'below'}">MA200 $${ta.ma200!=null?Number(ta.ma200).toFixed(2):'N/A'} (${esc(ta.price_vs_ma200||'?')})</span>
         </div>
       </div>
-      <div style="margin-top:8px;">
+      <div style="margin-top:8px">
         <div class="card-label" style="margin-bottom:4px">Support &amp; Resistance</div>
         <div class="levels-row">
-          <div class="level-box"><div class="level-val support">$${ta.support!=null?Number(ta.support).toFixed(2):'N/A'}</div><div class="level-lbl">▲ Support</div></div>
-          <div class="level-box"><div class="level-val resist">$${ta.resistance!=null?Number(ta.resistance).toFixed(2):'N/A'}</div><div class="level-lbl">▼ Resistance</div></div>
+          <div class="level-box"><div class="lv-val sup">$${ta.support!=null?Number(ta.support).toFixed(2):'N/A'}</div><div class="lv-lbl">▲ Support</div></div>
+          <div class="level-box"><div class="lv-val res">$${ta.resistance!=null?Number(ta.resistance).toFixed(2):'N/A'}</div><div class="lv-lbl">▼ Resistance</div></div>
         </div>
       </div>
-      <div style="margin-top:8px;">
+      <div style="margin-top:8px">
         <div class="card-label" style="margin-bottom:4px">TA Overall</div>
-        <span class="ta-overall-badge ${taOvClass(taOv)}">${esc(taOv)}</span>
+        <span class="ta-badge ${taClass(ta.ta_overall||'Neutral')}">${esc(ta.ta_overall||'Neutral')}</span>
       </div>
-      ${chartUrl?`<a href="${chartUrl}" target="_blank" class="chart-link" style="margin-top:8px;display:flex;">📊 Open ${esc(d.ticker)} chart on Yahoo Finance →</a>`:''}
+      <a href="https://finance.yahoo.com/chart/${esc(d.ticker||'')}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:8px 0 2px;font-family:var(--mono);font-size:11px;color:var(--accent);text-decoration:none;margin-top:8px">
+        📊 Open live chart on Yahoo Finance →
+      </a>
     </div>`;
   }
 
-  // Sentiment section
+  // Sentiment
   let sentHtml = '';
-  if(d.sentiment) {
+  if (d.sentiment) {
     const s = d.sentiment;
-    const txCol = scoreToColor(s.twitter_x_score||50);
-    const rdCol = scoreToColor(s.reddit_score||50);
-    const ovCol = sentColor(s.overall_social);
-    sentHtml = `
-    <div class="card-section">
-      <div class="card-label">🐦 Social Sentiment</div>
-      <div class="sentiment-row">
+    const txc = sCol(s.twitter_x_score||50);
+    const rdc = sCol(s.reddit_score||50);
+    sentHtml = `<div class="card-section">
+      <div class="card-label">🐦 Social Sentiment — Twitter/X &amp; Reddit</div>
+      <div class="sent-row">
         <div class="sent-box">
-          <span class="sent-emoji">𝕏</span>
-          <div class="sent-label" style="color:${txCol}">${esc(s.twitter_x||'N/A')}</div>
-          <div class="sent-sublabel">${esc(s.twitter_x_note||'')}</div>
-          <div class="sent-bar-track"><div class="sent-bar-fill" style="width:${s.twitter_x_score||50}%;background:${txCol}"></div></div>
+          <span class="sent-icon">𝕏</span>
+          <div class="sent-val" style="color:${txc}">${esc(s.twitter_x||'N/A')}</div>
+          <div class="sent-sub">${esc(s.twitter_x_note||'')}</div>
+          <div class="sent-bar"><div class="sent-bar-fill" style="width:${s.twitter_x_score||50}%;background:${txc}"></div></div>
         </div>
         <div class="sent-box">
-          <span class="sent-emoji">🤖</span>
-          <div class="sent-label" style="color:${rdCol}">${esc(s.reddit||'N/A')}</div>
-          <div class="sent-sublabel">${esc(s.reddit_note||'')}</div>
-          <div class="sent-bar-track"><div class="sent-bar-fill" style="width:${s.reddit_score||50}%;background:${rdCol}"></div></div>
+          <span class="sent-icon">🤖</span>
+          <div class="sent-val" style="color:${rdc}">${esc(s.reddit||'N/A')}</div>
+          <div class="sent-sub">${esc(s.reddit_note||'')}</div>
+          <div class="sent-bar"><div class="sent-bar-fill" style="width:${s.reddit_score||50}%;background:${rdc}"></div></div>
         </div>
         <div class="sent-box">
-          <span class="sent-emoji">📊</span>
-          <div class="sent-label" style="color:${ovCol}">${esc(s.overall_social||'N/A')}</div>
-          <div class="sent-sublabel">Overall social</div>
+          <span class="sent-icon">📊</span>
+          <div class="sent-val" style="color:${sc(s.overall_social)}">${esc(s.overall_social||'N/A')}</div>
+          <div class="sent-sub">Overall social</div>
         </div>
       </div>
     </div>`;
   }
 
-  // Analyst section
-  let analystHtml = '';
-  if(d.analysts) {
+  // Analysts
+  let analHtml = '';
+  if (d.analysts) {
     const a = d.analysts;
-    const cClass = a.consensus?.toLowerCase().replace(' ','-')||'hold';
-    analystHtml = `
-    <div class="card-section">
-      <div class="card-label">🏦 Wall Street Analysts</div>
-      <div class="analyst-row">
-        <span class="analyst-pill ${cClass}">${esc(a.consensus||'N/A')}</span>
+    const ac = (a.consensus||'').toLowerCase().replace(' ','-');
+    analHtml = `<div class="card-section">
+      <div class="card-label">🏦 Wall Street Analyst Consensus</div>
+      <div class="analyst-top">
+        <span class="a-pill ${ac}">${esc(a.consensus||'N/A')}</span>
         <span style="font-family:var(--mono);font-size:11px;color:var(--muted)">${a.num_analysts||'?'} analysts</span>
-        <span class="analyst-target">Avg PT: $${a.avg_price_target!=null?Number(a.avg_price_target).toFixed(2):'N/A'}</span>
+        <span class="a-target">Avg PT: $${a.avg_price_target!=null?Number(a.avg_price_target).toFixed(2):'N/A'}</span>
       </div>
-      ${a.recent_changes?`<div style="font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5">${esc(a.recent_changes)}</div>`:''}
-      <div style="display:flex;gap:6px;margin-top:8px;">
-        ${a.bull_case?`<div style="flex:1;background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.15);border-radius:7px;padding:6px 8px;font-size:11px;color:#a7f3d0;line-height:1.5"><strong style="font-size:10px;display:block;margin-bottom:3px">▲ BULL</strong>${esc(a.bull_case)}</div>`:''}
-        ${a.bear_case?`<div style="flex:1;background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.15);border-radius:7px;padding:6px 8px;font-size:11px;color:#fecaca;line-height:1.5"><strong style="font-size:10px;display:block;margin-bottom:3px">▼ BEAR</strong>${esc(a.bear_case)}</div>`:''}
+      ${a.recent_changes?`<div class="a-changes">${esc(a.recent_changes)}</div>`:''}
+      <div class="a-cases">
+        ${a.bull_case?`<div class="a-case bull"><span class="a-case-label">▲ BULL</span>${esc(a.bull_case)}</div>`:''}
+        ${a.bear_case?`<div class="a-case bear"><span class="a-case-label">▼ BEAR</span>${esc(a.bear_case)}</div>`:''}
       </div>
     </div>`;
   }
 
   return `<div class="analysis-card">
     <div class="card-section">
-      ${contrFlag}
       <div class="price-hero">
         <span class="price-main">${priceNum?'$'+priceNum.toFixed(2):esc(d.price)}</span>
-        <span class="${changeClass}">${esc(d.price_change)}</span>
+        <span class="${chUp?'price-up':'price-dn'}">${esc(d.price_change)}</span>
       </div>
       <div class="card-label">Analysis — ${esc(d.ticker||'')}</div>
       <div style="color:var(--text);line-height:1.6;font-size:12.5px">${esc(d.analysis)}</div>
       <span class="signal ${sig.toLowerCase()}">${{BUY:'▲',SELL:'▼',HOLD:'◆'}[sig]||'◆'} ${sig}</span>
     </div>
-    ${targetsHtml}
-    ${taHtml}
-    ${sentHtml}
-    ${analystHtml}
+    ${ptHtml}${taHtml}${sentHtml}${analHtml}
     <div class="card-section">
       <div class="card-label">Confidence</div>
       <div class="conf-bar-wrap">
-        <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${d.confidence||50}%;background:${cc}"></div></div>
-        <div class="conf-val" style="color:${cc}">${d.confidence||50}%</div>
+        <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${d.confidence||50}%;background:${cc(d.confidence||50)}"></div></div>
+        <div class="conf-val" style="color:${cc(d.confidence||50)}">${d.confidence||50}%</div>
       </div>
     </div>
     <div class="card-section">
       <div class="card-label">Market Snapshot</div>
       <div class="metrics-grid">
-        <div class="metric-box"><span class="metric-val" style="color:${sc}">${d.metrics?.sentiment||'N/A'}</span><div class="metric-lbl">Sentiment</div></div>
+        <div class="metric-box"><span class="metric-val" style="color:${sc(d.metrics?.sentiment)}">${d.metrics?.sentiment||'N/A'}</span><div class="metric-lbl">Sentiment</div></div>
         <div class="metric-box"><span class="metric-val">${d.metrics?.volatility||'N/A'}</span><div class="metric-lbl">Volatility</div></div>
         <div class="metric-box"><span class="metric-val" style="font-size:10px">${d.metrics?.timeframe||'N/A'}</span><div class="metric-lbl">Timeframe</div></div>
       </div>
     </div>
-    ${srcHtml}
   </div>`;
 }
 
-/* ── DOM ── */
+/* ─── DOM ─── */
 function addMsg(role, html) {
   const w = document.getElementById('messages');
   const d = document.createElement('div');
@@ -579,7 +501,7 @@ function addMsg(role, html) {
 function addBotCard(bubble, card) {
   const w = document.getElementById('messages');
   const d = document.createElement('div');
-  d.className = 'msg bot'; d.style.maxWidth='100%';
+  d.className = 'msg bot'; d.style.maxWidth = '100%';
   d.innerHTML = `<div class="msg-label">StockAI</div><div class="bubble">${bubble}</div>${card}`;
   w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
@@ -587,10 +509,10 @@ function showTyping() {
   const w = document.getElementById('messages');
   const d = document.createElement('div');
   d.id = 'typing-ind'; d.className = 'msg bot';
-  d.innerHTML = `<div class="msg-label">StockAI</div><div class="bubble"><div class="searching-label" id="typing-label">Searching Yahoo Finance, Twitter/X, analyst reports...</div><div class="typing"><span></span><span></span><span></span></div></div>`;
+  d.innerHTML = `<div class="msg-label">StockAI</div><div class="bubble"><div class="searching-lbl">Analyzing — technical indicators, sentiment, analyst data...</div><div class="typing"><span></span><span></span><span></span></div></div>`;
   w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
-function removeTyping(){ const t=document.getElementById('typing-ind'); if(t) t.remove(); }
+function removeTyping() { const t=document.getElementById('typing-ind'); if(t) t.remove(); }
 
 async function sendMessage() {
   const input = document.getElementById('user-input');
@@ -601,22 +523,53 @@ async function sendMessage() {
   addMsg('user', esc(text));
   showTyping();
   try {
-    const { text: raw, tools, modelUsed } = await callGroq(text);
+    const raw = await callGemini(text);
     const data = parseResponse(raw);
     removeTyping();
-    const hasWeb = modelUsed !== 'llama-3.3-70b-versatile';
-    const modelNote = hasWeb
-      ? `Live analysis complete <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">(${modelUsed})</span>:`
-      : `Analysis complete <span style="font-family:var(--mono);font-size:10px;color:var(--amber)">(${modelUsed} - no live web search, using training data)</span>:`;
-    addBotCard(modelNote, buildCard(data, tools));
+    addBotCard('📡 Full analysis:', buildCard(data));
   } catch(e) {
     removeTyping();
-    addMsg('bot', `<span style="color:#f87171">Error: ${esc(e.message)}</span>`);
-    console.error(e);
+    addMsg('bot', `<span style="color:#f87171">⚠ ${esc(e.message)}</span>`);
   }
   btn.disabled = false; input.focus();
 }
 function sendChip(t){ document.getElementById('user-input').value=t; sendMessage(); }
+
+/* ─── KEY SETUP ─── */
+function startApp() {
+  const key = document.getElementById('api-key-input').value.trim();
+  if (!key || !key.startsWith('AIza')) {
+    alert('Please paste a valid Gemini API key (starts with AIza...)');
+    return;
+  }
+  API_KEY = key;
+  localStorage.setItem('stockai_gemini_key', key);
+  showMainApp();
+}
+
+function showMainApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('header').style.display = 'flex';
+  document.getElementById('chips').style.display = 'flex';
+  document.getElementById('messages').style.display = 'flex';
+  document.getElementById('input-row').style.display = 'flex';
+  addMsg('bot', 'Connected! Ask about any ticker — I\'ll give you technical indicators, Twitter/X &amp; Reddit sentiment, Wall Street analyst consensus, and specific buy/sell price targets.<br><br>Try: <strong>Full analysis NVDA</strong>');
+  document.getElementById('user-input').focus();
+}
+
+function changeKey() {
+  localStorage.removeItem('stockai_gemini_key');
+  location.reload();
+}
+
+// Auto-load saved key
+window.addEventListener('load', () => {
+  const hardcoded = 'AQ.Ab8RN6LOccuSENZAy2PfwCYHbiAQKKvnf_PgkAG1wj7JW4_6QA';
+  const saved = localStorage.getItem('stockai_gemini_key') || hardcoded;
+  API_KEY = saved;
+  document.getElementById('api-key-input').value = saved;
+  showMainApp();
+});
 </script>
 </body>
 </html>
