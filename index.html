@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>StockAI Suite</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -228,57 +230,69 @@ const SKIP_WORDS = new Set(['FULL','ANALYSIS','THE','FOR','BUY','SELL','HOLD','W
    LIVE PRICE FETCHER (Yahoo Finance, free)
 ========================================= */
 async function getLiveData(ticker) {
+  // Try multiple proxies in case one is blocked
+  const yurl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=3mo`;
+  const proxies = [
+    `https://api.allorigins.win/get?url=${encodeURIComponent(yurl)}`,
+    `https://corsproxy.io/?${encodeURIComponent(yurl)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yurl)}`,
+  ];
+
+  let raw = null;
+  for (const proxy of proxies) {
+    try {
+      const res = await fetch(proxy, { signal: AbortSignal.timeout(6000) });
+      if (!res.ok) continue;
+      const json = await res.json();
+      // allorigins wraps in .contents, others return directly
+      raw = json.contents ? JSON.parse(json.contents) : json;
+      if (raw?.chart?.result?.[0]) break; // success
+      raw = null;
+    } catch(e) { continue; }
+  }
+
+  if (!raw) return null;
+
   try {
-    const yurl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=3mo`;
-    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(yurl)}`;
-    const res = await fetch(proxy, {signal: AbortSignal.timeout(7000)});
-    const json = await res.json();
-    const data = JSON.parse(json.contents);
-    const r = data?.chart?.result?.[0];
-    if (!r) return null;
-
+    const r = raw.chart.result[0];
     const meta = r.meta;
-    const closes = r.indicators?.quote?.[0]?.close?.filter(Boolean) || [];
-    const vols = r.indicators?.quote?.[0]?.volume?.filter(Boolean) || [];
-    if (closes.length < 20) return null;
+    const closes = r.indicators?.quote?.[0]?.close?.filter(v => v != null) || [];
+    const vols   = r.indicators?.quote?.[0]?.volume?.filter(v => v != null) || [];
+    if (closes.length < 10) return null;
 
-    const price = meta.regularMarketPrice;
-    const prev  = meta.chartPreviousClose;
-    const chg   = (price - prev).toFixed(2);
-    const chgPct= ((price - prev) / prev * 100).toFixed(2);
+    const price = meta.regularMarketPrice || closes[closes.length-1];
+    const prev  = meta.chartPreviousClose || closes[closes.length-2] || price;
+    const chg   = +(price - prev).toFixed(2);
+    const chgPct= +((price - prev) / prev * 100).toFixed(2);
 
-    // RSI
     function rsi(arr, n=14) {
       if (arr.length < n+1) return 50;
       let g=0, l=0;
       for (let i=arr.length-n; i<arr.length; i++) {
-        const d = arr[i]-arr[i-1];
-        d>0 ? g+=d : l+=Math.abs(d);
+        const d=arr[i]-arr[i-1]; d>0?g+=d:l+=Math.abs(d);
       }
-      const rs=(g/n)/((l/n)||0.0001);
+      const rs=(g/n)/((l/n)||.0001);
       return +(100-(100/(1+rs))).toFixed(1);
     }
-
-    // EMA helper
     function ema(arr, n) {
       const k=2/(n+1); let e=arr[0];
-      arr.slice(1).forEach(v => e=v*k+e*(1-k));
+      for(let i=1;i<arr.length;i++) e=arr[i]*k+e*(1-k);
       return e;
     }
 
-    const ma50  = closes.length>=50  ? +(closes.slice(-50).reduce((a,b)=>a+b)/50).toFixed(2) : null;
-    const ma200 = closes.length>=200 ? +(closes.slice(-200).reduce((a,b)=>a+b)/200).toFixed(2) : null;
+    const ma50  = closes.length>=50  ? +(closes.slice(-50).reduce((a,b)=>a+b)/50).toFixed(2)   : null;
+    const ma200 = closes.length>=200 ? +(closes.slice(-200).reduce((a,b)=>a+b)/200).toFixed(2)  : null;
     const sup   = +(Math.min(...closes.slice(-20))).toFixed(2);
     const res2  = +(Math.max(...closes.slice(-20))).toFixed(2);
     const rsiVal= rsi(closes);
     const macd  = closes.length>26 ? ema(closes.slice(-26),12)-ema(closes.slice(-26),26) : 0;
-    const avgVol= vols.slice(-30).reduce((a,b)=>a+b,0)/30;
-    const lastVol= vols[vols.length-1]||0;
+    const avgVol= vols.length ? vols.slice(-30).reduce((a,b)=>a+b,0)/Math.min(30,vols.length) : 0;
+    const lastVol= vols[vols.length-1] || 0;
     const volRatio= +(lastVol/(avgVol||1)).toFixed(1);
 
     return {
       ticker, price:+price.toFixed(2), prev:+prev.toFixed(2),
-      chg:+chg, chgPct, rsi:rsiVal,
+      chg, chgPct, rsi:rsiVal,
       macdBull: macd>0, ma50, ma200,
       vs50:  ma50  ? (price>ma50  ?'Above':'Below') : null,
       vs200: ma200 ? (price>ma200 ?'Above':'Below') : null,
@@ -286,7 +300,7 @@ async function getLiveData(ticker) {
       mktCap: meta.marketCap ? (meta.marketCap/1e9).toFixed(1)+'B' : null,
     };
   } catch(e) {
-    console.warn('Live data error:', e.message);
+    console.warn('Parse error:', e);
     return null;
   }
 }
