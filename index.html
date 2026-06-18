@@ -310,15 +310,59 @@ async function getLiveData(ticker) {
 ========================================= */
 const history = [];
 
-const SYSTEM = `You are StockAI, a professional stock analyst. When given LIVE DATA, you MUST use those exact numbers — never invent prices. Respond ONLY with raw JSON (no markdown, no backticks):
+const SYSTEM = `You are StockAI. You will receive LIVE DATA in the user message. You MUST use ONLY the numbers from that live data. Never invent, estimate or change any number. If a number is not in the live data, calculate it directly from what is provided.
+
+Calculation rules (do these yourself from the live data):
+- Stop Loss = Entry Price × 0.94 (6% below entry)
+- Take Profit = Resistance level from live data
+- Entry = Support level from live data (or current price if buying now)
+- Upside % = ((Take Profit - Current Price) / Current Price) × 100
+- Downside % = ((Current Price - Stop Loss) / Current Price) × 100  
+- Risk/Reward = (Take Profit - Entry) / (Entry - Stop Loss), format as "1:X"
+- RSI, MA50, MA200, Support, Resistance = copy EXACTLY from live data, do not round differently
+
+Respond ONLY with raw JSON, no markdown, no backticks, no explanation:
 {
-  "ticker":"NVDA","price":"142.50","price_change":"+2.3%",
-  "analysis":"3-4 sentences using the live data provided",
-  "signal":"BUY","confidence":74,
-  "price_targets":{"entry":140.00,"take_profit":165.00,"stop_loss":133.00,"risk_reward":"1:3.5","upside_pct":"+16%","downside_pct":"-5%"},
-  "ta":{"rsi":58.4,"rsi_signal":"Neutral","macd_bullish":true,"macd_note":"Positive momentum","ma50":138.20,"ma200":121.50,"price_vs_ma50":"Above","price_vs_ma200":"Above","volume_vs_avg":"Above Average","volume_note":"1.4x avg","support":136.00,"resistance":155.00,"ta_overall":"Buy","trend":"Uptrend"},
-  "sentiment":{"twitter_x":"Bullish","twitter_x_score":71,"twitter_x_note":"Strong retail interest","reddit":"Bullish","reddit_score":68,"reddit_note":"Active in WSB","overall_social":"Bullish"},
-  "analysts":{"consensus":"Strong Buy","avg_price_target":165.00,"num_analysts":42,"recent_changes":"Goldman Buy, Citi raised PT","bull_case":"AI demand robust","bear_case":"Valuation stretched"},
+  "ticker":"NVDA",
+  "price":"142.50",
+  "price_change":"+2.30 (+1.65%)",
+  "analysis":"3-4 sentences referencing the exact live price, RSI value, and MA levels provided",
+  "signal":"BUY",
+  "confidence":74,
+  "price_targets":{
+    "entry":136.00,
+    "take_profit":155.00,
+    "stop_loss":127.84,
+    "risk_reward":"1:2.3",
+    "upside_pct":"+8.7%",
+    "downside_pct":"-6.0%"
+  },
+  "ta":{
+    "rsi":58.4,
+    "rsi_signal":"Neutral",
+    "macd_bullish":true,
+    "macd_note":"Positive momentum",
+    "ma50":138.20,
+    "ma200":121.50,
+    "price_vs_ma50":"Above",
+    "price_vs_ma200":"Above",
+    "volume_vs_avg":"Above Average",
+    "volume_note":"1.4x 30-day average",
+    "support":136.00,
+    "resistance":155.00,
+    "ta_overall":"Buy",
+    "trend":"Uptrend"
+  },
+  "sentiment":{
+    "twitter_x":"Bullish","twitter_x_score":71,"twitter_x_note":"Strong retail interest",
+    "reddit":"Bullish","reddit_score":68,"reddit_note":"Active in WSB and r/stocks",
+    "overall_social":"Bullish"
+  },
+  "analysts":{
+    "consensus":"Strong Buy","avg_price_target":165.00,"num_analysts":42,
+    "recent_changes":"Goldman Buy, Citi raised PT",
+    "bull_case":"AI demand remains robust","bear_case":"Valuation stretched at current levels"
+  },
   "metrics":{"sentiment":"Bullish","volatility":"Medium","timeframe":"Mid-term"}
 }`;
 
@@ -330,34 +374,112 @@ async function callAI(userMsg) {
   const words = userMsg.toUpperCase().replace(/[^A-Z\s]/g,'').split(/\s+/);
   const ticker = words.find(w => w.length>=1 && w.length<=5 && !SKIP_WORDS.has(w));
 
-  // Fetch live data if ticker found
   let liveCtx = '';
+  let liveNumbers = null; // we'll use these to override AI output
+
   if (ticker) {
-    setTypingLabel(`Fetching live price for ${ticker}...`);
+    setTypingLabel(`Fetching live data for ${ticker}...`);
     const live = await getLiveData(ticker);
-    if (live) {
-      setTypingLabel(`Got $${live.price} — running AI analysis...`);
-      liveCtx = `\n\n=== LIVE DATA FOR ${ticker} — USE THESE EXACT NUMBERS ===`
-        + `\nPrice: $${live.price} (${live.chg>=0?'+':''}${live.chg} / ${live.chgPct>=0?'+':''}${live.chgPct}% today)`
-        + `\nPrev Close: $${live.prev}`
-        + (live.mktCap ? `\nMarket Cap: $${live.mktCap}` : '')
-        + `\nRSI(14): ${live.rsi} — ${live.rsi>=70?'Overbought':live.rsi<=30?'Oversold':'Neutral'}`
-        + `\nMACD: ${live.macdBull?'Bullish (positive)':'Bearish (negative)'}`
-        + (live.ma50  ? `\n50-day MA: $${live.ma50} — price is ${live.vs50}` : '')
-        + (live.ma200 ? `\n200-day MA: $${live.ma200} — price is ${live.vs200}` : '')
-        + `\n20-day Support: $${live.sup}`
-        + `\n20-day Resistance: $${live.res}`
-        + `\nVolume: ${live.volRatio}x 30-day average`
-        + `\nEntry target: ~$${live.sup}`
-        + `\nTake Profit target: ~$${live.res}`
-        + `\nStop Loss: ~$${(live.price*0.945).toFixed(2)}`
-        + `\n=== END LIVE DATA ===`;
-    } else {
-      liveCtx = `\n\n(Live price fetch failed for ${ticker} — use your best knowledge but note data may not be current)`;
+
+    if (live && live.price) {
+      setTypingLabel(`Calculating indicators... got $${live.price}`);
+
+      // ── Compute ALL numbers ourselves from real data ──
+      const price    = live.price;
+      const sup      = live.sup;
+      const res      = live.res;
+      const rsiVal   = live.rsi;
+      const ma50     = live.ma50;
+      const ma200    = live.ma200;
+
+      // Price targets — calculated from real levels
+      const entry    = +Math.min(price, sup * 1.005).toFixed(2);
+      const tp       = +(res * 0.98).toFixed(2);           // just below resistance
+      const sl       = +(price * 0.945).toFixed(2);        // 5.5% stop loss
+      const riskAmt  = +(price - sl).toFixed(2);
+      const rewAmt   = +(tp - price).toFixed(2);
+      const rr       = riskAmt > 0 ? (rewAmt/riskAmt).toFixed(1) : '0';
+      const upsidePct= +(rewAmt/price*100).toFixed(1);
+      const downPct  = +(riskAmt/price*100).toFixed(1);
+
+      // Change from yesterday
+      const chgNum   = live.chg;
+      const chgPct   = live.chgPct;
+      const chgStr   = (chgNum>=0?'+':'')+chgNum+' ('+( chgPct>=0?'+':'')+chgPct+'%)';
+
+      // Volume
+      const volStr   = live.volRatio+'x 30-day avg';
+      const volLabel = live.volRatio>=1.5?'Above Average':live.volRatio<0.7?'Below Average':'Average';
+
+      // RSI signal
+      const rsiSig   = rsiVal>=70?'Overbought':rsiVal<=30?'Oversold':'Neutral';
+
+      // MACD
+      const macdStr  = live.macdBull?'Bullish (positive histogram)':'Bearish (negative histogram)';
+
+      // MA status
+      const ma50str  = ma50  ? `$${ma50} — price is ${live.vs50}`   : 'N/A';
+      const ma200str = ma200 ? `$${ma200} — price is ${live.vs200}` : 'N/A';
+
+      // Overall TA signal (simple rule-based)
+      let bullPoints = 0;
+      if (rsiVal < 60 && rsiVal > 30) bullPoints++;
+      if (live.macdBull) bullPoints++;
+      if (live.vs50  === 'Above') bullPoints++;
+      if (live.vs200 === 'Above') bullPoints++;
+      const taOverall = bullPoints>=4?'Strong Buy':bullPoints===3?'Buy':bullPoints===2?'Neutral':bullPoints===1?'Sell':'Strong Sell';
+      const trend     = live.vs200==='Above'?(live.vs50==='Above'?'Uptrend':'Mixed'):'Downtrend';
+
+      // Store real computed numbers to inject into card later
+      liveNumbers = {
+        ticker, price, chgStr, chgPct,
+        entry, tp, sl,
+        rr: `1:${rr}`,
+        upsidePct: `+${upsidePct}%`,
+        downPct: `-${downPct}%`,
+        rsi: rsiVal, rsiSig,
+        macdBull: live.macdBull, macdNote: macdStr,
+        ma50: ma50||null, ma200: ma200||null,
+        vs50: live.vs50, vs200: live.vs200,
+        sup, res,
+        volLabel, volStr,
+        taOverall, trend,
+        mktCap: live.mktCap,
+      };
+
+      // Tell AI the exact numbers — it only writes the analysis text
+      liveCtx = `
+
+=== LIVE COMPUTED DATA FOR ${ticker} — DO NOT CHANGE ANY OF THESE NUMBERS ===
+Current Price: $${price} (${chgStr} today)
+Market Cap: ${live.mktCap||'N/A'}
+
+TECHNICAL (computed from real Yahoo Finance price history):
+RSI(14): ${rsiVal} — ${rsiSig}
+MACD: ${macdStr}
+50-day MA: ${ma50str}
+200-day MA: ${ma200str}
+20-day Support: $${sup}
+20-day Resistance: $${res}
+Volume: ${volStr} (${volLabel})
+Overall TA: ${taOverall}
+Trend: ${trend}
+
+PRICE TARGETS (pre-calculated — use these exact numbers):
+Entry: $${entry}
+Take Profit: $${tp}
+Stop Loss: $${sl}
+Risk/Reward: 1:${rr}
+Upside: +${upsidePct}%
+Downside: -${downPct}%
+
+YOUR JOB: Write ONLY the "analysis" field (3-4 sentences explaining what these numbers mean and why). 
+Also write sentiment and analyst sections based on your knowledge of ${ticker}.
+Use ALL the exact numbers above in your JSON response — do not change them.
+=== END LIVE DATA ===`;
     }
   }
 
-  // Add live context to message
   const msgs = trimmed.map((m,i) =>
     i===trimmed.length-1 ? {...m, content: m.content + liveCtx} : m
   );
@@ -368,8 +490,8 @@ async function callAI(userMsg) {
     body:JSON.stringify({
       model:'llama-3.3-70b-versatile',
       messages:[{role:'system',content:SYSTEM},...msgs],
-      temperature:0.3,
-      max_tokens:1200
+      temperature:0.2,
+      max_tokens:1000
     })
   });
 
@@ -384,9 +506,10 @@ async function callAI(userMsg) {
   }
 
   const text = data.choices[0].message.content || '';
-  history.push({role:'assistant', content:text.slice(0,600)});
-  return text;
+  history.push({role:'assistant', content:text.slice(0,500)});
+  return { text, liveNumbers };
 }
+
 
 /* =========================================
    PARSE + BUILD CARD
@@ -586,9 +709,42 @@ async function send() {
   showTyping();
 
   try {
-    const raw = await callAI(msg);
+    const { text: raw, liveNumbers } = await callAI(msg);
     hideTyping();
     const d = parse(raw);
+
+    // Override AI-invented numbers with our real computed values
+    if (liveNumbers) {
+      d.ticker      = liveNumbers.ticker;
+      d.price       = String(liveNumbers.price);
+      d.price_change= (liveNumbers.chgPct>=0?'+':'')+liveNumbers.chgPct+'%';
+
+      d.price_targets = {
+        entry:        liveNumbers.entry,
+        take_profit:  liveNumbers.tp,
+        stop_loss:    liveNumbers.sl,
+        risk_reward:  liveNumbers.rr,
+        upside_pct:   liveNumbers.upsidePct,
+        downside_pct: liveNumbers.downPct,
+      };
+
+      if (!d.ta) d.ta = {};
+      d.ta.rsi          = liveNumbers.rsi;
+      d.ta.rsi_signal   = liveNumbers.rsiSig;
+      d.ta.macd_bullish = liveNumbers.macdBull;
+      d.ta.macd_note    = liveNumbers.macdNote;
+      d.ta.ma50         = liveNumbers.ma50;
+      d.ta.ma200        = liveNumbers.ma200;
+      d.ta.price_vs_ma50  = liveNumbers.vs50  || 'N/A';
+      d.ta.price_vs_ma200 = liveNumbers.vs200 || 'N/A';
+      d.ta.support      = liveNumbers.sup;
+      d.ta.resistance   = liveNumbers.res;
+      d.ta.volume_vs_avg= liveNumbers.volLabel;
+      d.ta.volume_note  = liveNumbers.volStr;
+      d.ta.ta_overall   = liveNumbers.taOverall;
+      d.ta.trend        = liveNumbers.trend;
+    }
+
     addCard('📡 Live Analysis:', buildCard(d));
   } catch(e) {
     hideTyping();
