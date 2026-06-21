@@ -13,8 +13,6 @@
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{width:100%;height:100%;overflow:hidden;font-family:var(--sans);background:var(--bg);color:var(--text);}
 #root{display:flex;width:100vw;height:100vh;}
-
-/* LEFT PANEL - CHAT */
 #left{width:360px;flex-shrink:0;display:flex;flex-direction:column;border-right:1px solid var(--border2);background:var(--bg2);}
 #chat-hdr{padding:12px 14px;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;gap:8px;flex-shrink:0;}
 .logo{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#1d4ed8,#3b82f6);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
@@ -40,12 +38,10 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--sans);backgro
 #txt{flex:1;padding:9px 12px;border-radius:7px;border:1px solid var(--border2);background:var(--bg);color:var(--text);font-size:13px;font-family:var(--sans);outline:none;}
 #txt:focus{border-color:var(--accent);}
 #txt::placeholder{color:var(--muted);}
-#sbtn{padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;letter-spacing:.04em;}
+#sbtn{padding:0 16px;background:var(--accent);color:#fff;border:none;border-radius:7px;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;}
 #sbtn:hover{opacity:.88;}
 #sbtn:disabled{opacity:.35;cursor:default;}
 .disc{font-size:9px;font-family:var(--mono);color:var(--muted);text-align:center;padding:5px;background:var(--bg2);}
-
-/* ANALYSIS CARD */
 .card{background:var(--bg);border:1px solid var(--border2);border-radius:9px;overflow:hidden;font-size:11.5px;width:100%;margin-top:6px;}
 .cs{padding:9px 11px;border-bottom:1px solid var(--border);}
 .cs:last-child{border-bottom:none;}
@@ -116,20 +112,14 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--sans);backgro
 .mv{font-family:var(--mono);font-size:11px;font-weight:600;display:block;}
 .ml2{font-size:9px;color:var(--muted);margin-top:1px;}
 .live-badge{display:inline-flex;align-items:center;gap:4px;font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:4px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:#34d399;margin-bottom:5px;}
-
-/* TOOLTIP */
 .tt{position:relative;cursor:help;}
 .tt:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e293b;color:#e2e8f0;font-family:var(--sans);font-size:11px;line-height:1.5;padding:7px 10px;border-radius:8px;border:1px solid rgba(255,255,255,.15);white-space:normal;width:190px;z-index:9999;pointer-events:none;box-shadow:0 4px 20px rgba(0,0,0,.5);}
 .tt:hover::before{content:'';position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#1e293b;z-index:9999;}
-
-/* TYPING */
 .typing{display:flex;gap:4px;padding:6px 0;align-items:center;}
 .typing span{width:5px;height:5px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite;}
 .typing span:nth-child(2){animation-delay:.2s;}.typing span:nth-child(3){animation-delay:.4s;}
 @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
 .slbl{font-size:10px;color:var(--muted);font-family:var(--mono);margin-bottom:5px;}
-
-/* RIGHT PANEL - SIMULATION */
 #right{flex:1;display:flex;flex-direction:column;background:var(--bg);}
 #sim-hdr{padding:11px 16px;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;gap:10px;flex-shrink:0;}
 #sim-hdr h2{font-size:13px;font-weight:600;}
@@ -143,161 +133,185 @@ html,body{width:100%;height:100%;overflow:hidden;font-family:var(--sans);backgro
 .ccell{background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
 .clabel{padding:5px 10px;font-family:var(--mono);font-size:10px;color:var(--muted);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .cticker{font-weight:700;color:var(--text);}
-.cpct{margin-left:4px;}
-.cpr{margin-left:auto;}
 canvas{width:100%!important;flex:1;display:block;}
 #ai-log{height:80px;border-top:1px solid var(--border);background:var(--bg2);overflow-y:auto;padding:5px 12px;flex-shrink:0;}
 #ai-log::-webkit-scrollbar{width:3px;}
 #ai-log::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .ll{font-family:var(--mono);font-size:10px;line-height:1.8;display:flex;gap:8px;}
-.lt{color:var(--muted);}
-.lb{color:#34d399;}.ls{color:#f87171;}.lh{color:var(--muted);}
+.lt{color:var(--muted);}.lb{color:#34d399;}.ls{color:#f87171;}.lh{color:var(--muted);}
 .lp{color:#34d399;font-weight:600;}.ln{color:#f87171;font-weight:600;}
 </style>
 </head>
 <body>
 <div id="root">
-
-<!-- CHAT PANEL -->
 <div id="left">
   <div id="chat-hdr">
     <div class="logo">AI</div>
-    <div>
-      <h1>StockAI Suite</h1>
-      <div class="sub">Live data · Free · No credit card</div>
-    </div>
+    <div><h1>StockAI Suite</h1><div class="sub">Live · Accurate · Free</div></div>
     <div class="dot"></div>
   </div>
   <div id="chips">
-    <div class="chip" onclick="ask('Full analysis NVDA')">NVDA</div>
-    <div class="chip" onclick="ask('Full analysis AAPL')">AAPL</div>
-    <div class="chip" onclick="ask('Full analysis TSLA')">TSLA</div>
-    <div class="chip" onclick="ask('Full analysis MSFT')">MSFT</div>
-    <div class="chip" onclick="ask('Full analysis META')">META</div>
-    <div class="chip" onclick="ask('Full analysis SPY')">SPY</div>
-    <div class="chip" onclick="ask('Full analysis AMZN')">AMZN</div>
+    <div class="chip" onclick="ask('NVDA')">NVDA</div>
+    <div class="chip" onclick="ask('AAPL')">AAPL</div>
+    <div class="chip" onclick="ask('TSLA')">TSLA</div>
+    <div class="chip" onclick="ask('MSFT')">MSFT</div>
+    <div class="chip" onclick="ask('META')">META</div>
+    <div class="chip" onclick="ask('SPY')">SPY</div>
+    <div class="chip" onclick="ask('AMZN')">AMZN</div>
   </div>
   <div id="msgs">
     <div class="msg bot">
       <div class="mlbl">StockAI</div>
-      <div class="bbl">Ask about any stock ticker for live analysis — real price, RSI, MACD, analyst ratings and price targets.<br><br>💡 <em>Hover any metric for a plain-English explanation.</em></div>
+      <div class="bbl">Ask about any ticker — I fetch real live prices and calculate all indicators from actual data.<br><br>💡 <em>Hover any metric for an explanation.</em></div>
     </div>
   </div>
   <div id="inp-row">
-    <input id="txt" type="text" placeholder="Type a ticker e.g. NVDA..." />
+    <input id="txt" type="text" placeholder="Type a ticker e.g. NVDA..."/>
     <button id="sbtn">SEND</button>
   </div>
   <div class="disc">⚠ Educational only. Not financial advice.</div>
 </div>
 
-<!-- SIMULATION PANEL -->
 <div id="right">
   <div id="sim-hdr">
     <h2>AI Trading Simulation</h2>
     <span class="sbadge">🤖 LIVE</span>
     <span id="gen-lbl" style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:8px">Generation 1</span>
-    <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto">AI learns from every trade</span>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-left:auto">Learns from every trade</span>
   </div>
   <div id="sim-stats">
-    <div class="stbox"><span class="stv" id="s-port">$10,000</span><div class="stl tt" data-tip="Total value: cash + open positions. Starts at $10,000.">Portfolio</div></div>
-    <div class="stbox"><span class="stv" id="s-pnl">+$0.00</span><div class="stl tt" data-tip="Total profit or loss since start.">P&L</div></div>
+    <div class="stbox"><span class="stv" id="s-port">$10,000</span><div class="stl tt" data-tip="Total value: cash + open positions.">Portfolio</div></div>
+    <div class="stbox"><span class="stv" id="s-pnl">+$0.00</span><div class="stl tt" data-tip="Total profit or loss since start.">P&amp;L</div></div>
     <div class="stbox"><span class="stv" id="s-trades">0</span><div class="stl tt" data-tip="Completed buy+sell trades.">Trades</div></div>
     <div class="stbox"><span class="stv" id="s-wr">0%</span><div class="stl tt" data-tip="% of trades that were profitable.">Win Rate</div></div>
-    <div class="stbox"><span class="stv" id="s-reward">0.00</span><div class="stl tt" data-tip="Cumulative reward. AI maximizes this.">AI Reward</div></div>
-    <div class="stbox"><span class="stv" id="s-eps">100%</span><div class="stl tt" data-tip="Exploration: how often AI tries random actions. Decreases as it learns.">Explore ε</div></div>
+    <div class="stbox"><span class="stv" id="s-reward">0.00</span><div class="stl tt" data-tip="Cumulative reward score. AI maximizes this.">AI Reward</div></div>
+    <div class="stbox"><span class="stv" id="s-eps">100%</span><div class="stl tt" data-tip="How often AI tries random actions vs learned strategy.">Explore ε</div></div>
   </div>
   <div id="charts-area">
-    <div class="ccell" id="cell-0"><div class="clabel"><span class="cticker">NVDA</span><span class="cpct" id="pct-0"></span><span class="cpr" id="cp-0"></span></div><canvas id="cv-0"></canvas></div>
-    <div class="ccell" id="cell-1"><div class="clabel"><span class="cticker">AAPL</span><span class="cpct" id="pct-1"></span><span class="cpr" id="cp-1"></span></div><canvas id="cv-1"></canvas></div>
-    <div class="ccell" id="cell-2"><div class="clabel"><span class="cticker">TSLA</span><span class="cpct" id="pct-2"></span><span class="cpr" id="cp-2"></span></div><canvas id="cv-2"></canvas></div>
-    <div class="ccell" id="cell-3"><div class="clabel"><span class="cticker">MSFT</span><span class="cpct" id="pct-3"></span><span class="cpr" id="cp-3"></span></div><canvas id="cv-3"></canvas></div>
+    <div class="ccell" id="cell-0"><div class="clabel"><span class="cticker">NVDA</span><span id="pct-0" style="margin-left:4px"></span><span id="cp-0" style="margin-left:auto"></span></div><canvas id="cv-0"></canvas></div>
+    <div class="ccell" id="cell-1"><div class="clabel"><span class="cticker">AAPL</span><span id="pct-1" style="margin-left:4px"></span><span id="cp-1" style="margin-left:auto"></span></div><canvas id="cv-1"></canvas></div>
+    <div class="ccell" id="cell-2"><div class="clabel"><span class="cticker">TSLA</span><span id="pct-2" style="margin-left:4px"></span><span id="cp-2" style="margin-left:auto"></span></div><canvas id="cv-2"></canvas></div>
+    <div class="ccell" id="cell-3"><div class="clabel"><span class="cticker">MSFT</span><span id="pct-3" style="margin-left:4px"></span><span id="cp-3" style="margin-left:auto"></span></div><canvas id="cv-3"></canvas></div>
   </div>
-  <div id="ai-log">
-    <div class="ll"><span class="lt">00:00</span><span class="lh">Simulation started. AI initializing strategy weights...</span></div>
-  </div>
+  <div id="ai-log"><div class="ll"><span class="lt">00:00</span><span class="lh">Simulation started...</span></div></div>
 </div>
-
 </div>
 
 <script>
-/* =========================================
-   CONFIGURATION
-========================================= */
-const GROQ_KEY = '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';
-const SKIP_WORDS = new Set(['FULL','ANALYSIS','THE','FOR','BUY','SELL','HOLD','WHAT','IS','ARE','ABOUT','GIVE','ME','A','AN','AND','OR','OF','TO','IN','ON','AT','DO','HOW','WHY','WHEN','STOCK','PRICE','TELL','SHOULD','I','MY','GET','SHOW','CAN','YOU']);
+const GROQ_KEY  = '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';
+const SKIP      = new Set(['FULL','ANALYSIS','THE','FOR','BUY','SELL','HOLD','WHAT','IS','ARE','ABOUT','GIVE','ME','A','AN','AND','OR','OF','TO','IN','ON','AT','DO','HOW','WHY','WHEN','STOCK','PRICE','TELL','SHOULD','I','MY','GET','SHOW','CAN','YOU','ANALYZE','ANALYSIS']);
+const history   = [];
 
-/* =========================================
-   LIVE PRICE FETCHER (Yahoo Finance, free)
-========================================= */
+/* ── TOOLTIPS ── */
+const TIPS = {
+  entry:  'Best price to open a position — near support level.',
+  tp:     'Target sell price for maximum gain — near resistance.',
+  sl:     'Exit price if trade goes wrong — limits loss to ~5%.',
+  rr:     'Risk/Reward ratio. 1:2 means risking $1 to make $2. Higher is better.',
+  rsi:    'RSI measures momentum. Above 70 = overbought (may drop). Below 30 = oversold (may rise).',
+  macd:   'MACD shows trend direction. Bullish = upward momentum. Bearish = downward.',
+  ma50:   '50-day average price. Price above it = short-term uptrend.',
+  ma200:  '200-day average price. Most important long-term trend indicator.',
+  sup:    '20-day low — price floor where buyers step in.',
+  res:    '20-day high — price ceiling where sellers appear.',
+  conf:   'Confidence based on how many indicators agree with each other.',
+  tx:     'Sentiment from Twitter/X posts about this stock.',
+  rd:     'Sentiment from Reddit (r/wallstreetbets, r/stocks).',
+  cons:   'Wall Street analyst consensus from published ratings.',
+  pt:     'Average 12-month price target from professional analysts.',
+};
+
+/* ── LIVE DATA ── */
 async function getLiveData(ticker) {
-  // Try multiple proxies in case one is blocked
-  const yurl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=3mo`;
+  // 1y range so we have enough closes for MA200
+  const yurl = encodeURIComponent(
+    `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`
+  );
   const proxies = [
-    `https://api.allorigins.win/get?url=${encodeURIComponent(yurl)}`,
-    `https://corsproxy.io/?${encodeURIComponent(yurl)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(yurl)}`,
+    `https://api.allorigins.win/get?url=${yurl}`,
+    `https://corsproxy.io/?${yurl}`,
+    `https://api.codetabs.com/v1/proxy?quest=${yurl}`,
   ];
 
-  let raw = null;
+  let result = null;
   for (const proxy of proxies) {
     try {
-      const res = await fetch(proxy, { signal: AbortSignal.timeout(6000) });
+      const res  = await fetch(proxy, { signal: AbortSignal.timeout(7000) });
       if (!res.ok) continue;
       const json = await res.json();
-      // allorigins wraps in .contents, others return directly
-      raw = json.contents ? JSON.parse(json.contents) : json;
-      if (raw?.chart?.result?.[0]) break; // success
-      raw = null;
-    } catch(e) { continue; }
+      const raw  = json.contents ? JSON.parse(json.contents) : json;
+      if (raw?.chart?.result?.[0]) { result = raw; break; }
+    } catch { continue; }
   }
-
-  if (!raw) return null;
+  if (!result) return null;
 
   try {
-    const r = raw.chart.result[0];
-    const meta = r.meta;
-    const closes = r.indicators?.quote?.[0]?.close?.filter(v => v != null) || [];
-    const vols   = r.indicators?.quote?.[0]?.volume?.filter(v => v != null) || [];
-    if (closes.length < 10) return null;
+    const r      = result.chart.result[0];
+    const meta   = r.meta;
+    const closes = (r.indicators?.quote?.[0]?.close || []).filter(v => v != null);
+    const vols   = (r.indicators?.quote?.[0]?.volume || []).filter(v => v != null);
+    if (closes.length < 20) return null;
 
-    const price = meta.regularMarketPrice || closes[closes.length-1];
-    const prev  = meta.chartPreviousClose || closes[closes.length-2] || price;
-    const chg   = +(price - prev).toFixed(2);
-    const chgPct= +((price - prev) / prev * 100).toFixed(2);
+    // ── Price & daily change ──
+    const price = meta.regularMarketPrice || closes[closes.length - 1];
+    // regularMarketPreviousClose = yesterday's close (accurate daily change)
+    const prev  = meta.regularMarketPreviousClose
+                || meta.chartPreviousClose
+                || closes[closes.length - 2]
+                || price;
+    const chg    = +(price - prev).toFixed(2);
+    const chgPct = +((price - prev) / prev * 100).toFixed(2);
 
-    function rsi(arr, n=14) {
-      if (arr.length < n+1) return 50;
-      let g=0, l=0;
-      for (let i=arr.length-n; i<arr.length; i++) {
-        const d=arr[i]-arr[i-1]; d>0?g+=d:l+=Math.abs(d);
+    // ── RSI(14) ──
+    function calcRSI(arr, n = 14) {
+      if (arr.length < n + 1) return 50;
+      let g = 0, l = 0;
+      for (let i = arr.length - n; i < arr.length; i++) {
+        const d = arr[i] - arr[i - 1];
+        d > 0 ? g += d : l += Math.abs(d);
       }
-      const rs=(g/n)/((l/n)||.0001);
-      return +(100-(100/(1+rs))).toFixed(1);
+      const rs = (g / n) / ((l / n) || 0.0001);
+      return +(100 - (100 / (1 + rs))).toFixed(1);
     }
-    function ema(arr, n) {
-      const k=2/(n+1); let e=arr[0];
-      for(let i=1;i<arr.length;i++) e=arr[i]*k+e*(1-k);
+
+    // ── EMA ──
+    function calcEMA(arr, n) {
+      const k = 2 / (n + 1);
+      let e = arr[0];
+      for (let i = 1; i < arr.length; i++) e = arr[i] * k + e * (1 - k);
       return e;
     }
 
-    const ma50  = closes.length>=50  ? +(closes.slice(-50).reduce((a,b)=>a+b)/50).toFixed(2)   : null;
-    const ma200 = closes.length>=200 ? +(closes.slice(-200).reduce((a,b)=>a+b)/200).toFixed(2)  : null;
-    const sup   = +(Math.min(...closes.slice(-20))).toFixed(2);
-    const res2  = +(Math.max(...closes.slice(-20))).toFixed(2);
-    const rsiVal= rsi(closes);
-    const macd  = closes.length>26 ? ema(closes.slice(-26),12)-ema(closes.slice(-26),26) : 0;
-    const avgVol= vols.length ? vols.slice(-30).reduce((a,b)=>a+b,0)/Math.min(30,vols.length) : 0;
-    const lastVol= vols[vols.length-1] || 0;
-    const volRatio= +(lastVol/(avgVol||1)).toFixed(1);
+    // ── MACD: EMA12 - EMA26 of full close history ──
+    const macdVal = closes.length > 26
+      ? calcEMA(closes, 12) - calcEMA(closes, 26)
+      : 0;
+
+    // ── Moving averages ──
+    const ma50  = closes.length >= 50
+      ? +(closes.slice(-50).reduce((a,b) => a+b, 0) / 50).toFixed(2) : null;
+    const ma200 = closes.length >= 200
+      ? +(closes.slice(-200).reduce((a,b) => a+b, 0) / 200).toFixed(2) : null;
+
+    // ── Support & Resistance (20-day) ──
+    const sup = +(Math.min(...closes.slice(-20))).toFixed(2);
+    const res = +(Math.max(...closes.slice(-20))).toFixed(2);
+
+    // ── Volume ──
+    const avgVol   = vols.slice(-30).reduce((a,b) => a+b, 0) / Math.min(30, vols.length);
+    const lastVol  = vols[vols.length - 1] || 0;
+    const volRatio = +(lastVol / (avgVol || 1)).toFixed(1);
 
     return {
-      ticker, price:+price.toFixed(2), prev:+prev.toFixed(2),
-      chg, chgPct, rsi:rsiVal,
-      macdBull: macd>0, ma50, ma200,
-      vs50:  ma50  ? (price>ma50  ?'Above':'Below') : null,
-      vs200: ma200 ? (price>ma200 ?'Above':'Below') : null,
-      sup, res: res2, volRatio,
-      mktCap: meta.marketCap ? (meta.marketCap/1e9).toFixed(1)+'B' : null,
+      ticker, price: +price.toFixed(2), prev: +prev.toFixed(2),
+      chg, chgPct,
+      rsi:      calcRSI(closes),
+      macdBull: macdVal > 0,
+      ma50, ma200,
+      vs50:  ma50  ? (price > ma50  ? 'Above' : 'Below') : null,
+      vs200: ma200 ? (price > ma200 ? 'Above' : 'Below') : null,
+      sup, res, volRatio,
+      mktCap: meta.marketCap ? (meta.marketCap / 1e9).toFixed(1) + 'B' : null,
     };
   } catch(e) {
     console.warn('Parse error:', e);
@@ -305,227 +319,149 @@ async function getLiveData(ticker) {
   }
 }
 
-/* =========================================
-   GROQ API
-========================================= */
-const history = [];
+/* ── COMPUTE ALL NUMBERS FROM REAL DATA ── */
+function computeTargets(live) {
+  const price = live.price;
+  const sup   = live.sup;
+  const res   = live.res;
 
-const SYSTEM = `You are StockAI. You will receive LIVE DATA in the user message. You MUST use ONLY the numbers from that live data. Never invent, estimate or change any number. If a number is not in the live data, calculate it directly from what is provided.
+  // Entry: buy near current price (or pull back to support if overextended)
+  const entry = +(price > sup * 1.05 ? price * 0.99 : price).toFixed(2);
 
-Calculation rules (do these yourself from the live data):
-- Stop Loss = Entry Price × 0.94 (6% below entry)
-- Take Profit = Resistance level from live data
-- Entry = Support level from live data (or current price if buying now)
-- Upside % = ((Take Profit - Current Price) / Current Price) × 100
-- Downside % = ((Current Price - Stop Loss) / Current Price) × 100  
-- Risk/Reward = (Take Profit - Entry) / (Entry - Stop Loss), format as "1:X"
-- RSI, MA50, MA200, Support, Resistance = copy EXACTLY from live data, do not round differently
+  // Stop loss: exactly 5% below entry
+  const sl       = +(entry * 0.95).toFixed(2);
+  const riskAmt  = entry - sl;
 
-Respond ONLY with raw JSON, no markdown, no backticks, no explanation:
-{
-  "ticker":"NVDA",
-  "price":"142.50",
-  "price_change":"+2.30 (+1.65%)",
-  "analysis":"3-4 sentences referencing the exact live price, RSI value, and MA levels provided",
-  "signal":"BUY",
-  "confidence":74,
-  "price_targets":{
-    "entry":136.00,
-    "take_profit":155.00,
-    "stop_loss":127.84,
-    "risk_reward":"1:2.3",
-    "upside_pct":"+8.7%",
-    "downside_pct":"-6.0%"
-  },
-  "ta":{
-    "rsi":58.4,
-    "rsi_signal":"Neutral",
-    "macd_bullish":true,
-    "macd_note":"Positive momentum",
-    "ma50":138.20,
-    "ma200":121.50,
-    "price_vs_ma50":"Above",
-    "price_vs_ma200":"Above",
-    "volume_vs_avg":"Above Average",
-    "volume_note":"1.4x 30-day average",
-    "support":136.00,
-    "resistance":155.00,
-    "ta_overall":"Buy",
-    "trend":"Uptrend"
-  },
-  "sentiment":{
-    "twitter_x":"Bullish","twitter_x_score":71,"twitter_x_note":"Strong retail interest",
-    "reddit":"Bullish","reddit_score":68,"reddit_note":"Active in WSB and r/stocks",
-    "overall_social":"Bullish"
-  },
-  "analysts":{
-    "consensus":"Strong Buy","avg_price_target":165.00,"num_analysts":42,
-    "recent_changes":"Goldman Buy, Citi raised PT",
-    "bull_case":"AI demand remains robust","bear_case":"Valuation stretched at current levels"
-  },
-  "metrics":{"sentiment":"Bullish","volatility":"Medium","timeframe":"Mid-term"}
-}`;
+  // Take profit: at least 2:1 R/R, pushed to resistance if higher
+  const minTP  = +(entry + riskAmt * 2).toFixed(2);
+  const tp     = +(Math.max(minTP, res)).toFixed(2);
+  const rewAmt = tp - entry;
+  const rr     = riskAmt > 0 ? (rewAmt / riskAmt).toFixed(1) : '2.0';
+
+  // TA overall — count bullish signals
+  let bull = 0;
+  if (live.rsi >= 30 && live.rsi <= 60) bull++;   // not overbought
+  if (live.macdBull)                    bull++;
+  if (live.vs50  === 'Above')           bull++;
+  if (live.vs200 === 'Above')           bull++;
+
+  const taOverall = bull >= 4 ? 'Strong Buy'
+                  : bull === 3 ? 'Buy'
+                  : bull === 2 ? 'Neutral'
+                  : bull === 1 ? 'Sell' : 'Strong Sell';
+
+  const trend = live.vs200 === 'Above'
+    ? (live.vs50 === 'Above' ? 'Uptrend' : 'Mixed')
+    : 'Downtrend';
+
+  const rsiSig  = live.rsi >= 70 ? 'Overbought' : live.rsi <= 30 ? 'Oversold' : 'Neutral';
+  const volLabel = live.volRatio >= 1.5 ? 'Above Average'
+                 : live.volRatio < 0.7  ? 'Below Average' : 'Average';
+
+  return {
+    entry, tp, sl,
+    rr:       `1:${rr}`,
+    upside:   `+${+(rewAmt / entry * 100).toFixed(1)}%`,
+    downside: `-${+(riskAmt / entry * 100).toFixed(1)}%`,
+    taOverall, trend, rsiSig, volLabel,
+    volStr: `${live.volRatio}x 30-day avg`,
+    macdNote: live.macdBull ? 'Positive histogram (bullish)' : 'Negative histogram (bearish)',
+  };
+}
+
+/* ── GROQ API ── */
+const SYSTEM = `You are StockAI. You will be given LIVE computed data. Use the EXACT numbers provided — never invent prices or percentages. Respond ONLY with raw JSON (no markdown):
+{"ticker":"X","price":"0","price_change":"0%","analysis":"3-4 sentences explaining what the live indicators mean for this stock right now","signal":"BUY","confidence":70,"sentiment":{"twitter_x":"Bullish","twitter_x_score":65,"twitter_x_note":"brief note","reddit":"Bullish","reddit_score":60,"reddit_note":"brief note","overall_social":"Bullish"},"analysts":{"consensus":"Buy","avg_price_target":0,"num_analysts":30,"recent_changes":"recent analyst moves","bull_case":"bull argument","bear_case":"bear argument"},"metrics":{"sentiment":"Bullish","volatility":"Medium","timeframe":"Mid-term"}}`;
 
 async function callAI(userMsg) {
-  history.push({role:'user', content:userMsg});
+  history.push({ role: 'user', content: userMsg });
   const trimmed = history.slice(-4);
 
   // Extract ticker
-  const words = userMsg.toUpperCase().replace(/[^A-Z\s]/g,'').split(/\s+/);
-  const ticker = words.find(w => w.length>=1 && w.length<=5 && !SKIP_WORDS.has(w));
+  const words  = userMsg.toUpperCase().replace(/[^A-Z\s]/g,'').split(/\s+/);
+  const ticker = words.find(w => w.length >= 1 && w.length <= 5 && !SKIP.has(w));
 
-  let liveCtx = '';
-  let liveNumbers = null; // we'll use these to override AI output
+  let liveNumbers = null;
+  let liveCtx     = '';
 
   if (ticker) {
-    setTypingLabel(`Fetching live data for ${ticker}...`);
+    setTypingLabel(`Fetching 1 year of data for ${ticker}...`);
     const live = await getLiveData(ticker);
 
     if (live && live.price) {
-      setTypingLabel(`Calculating indicators... got $${live.price}`);
+      setTypingLabel(`Computing indicators for ${ticker} @ $${live.price}...`);
+      const t = computeTargets(live);
+      liveNumbers = { live, t };
 
-      // ── Compute ALL numbers ourselves from real data ──
-      const price    = live.price;
-      const sup      = live.sup;
-      const res      = live.res;
-      const rsiVal   = live.rsi;
-      const ma50     = live.ma50;
-      const ma200    = live.ma200;
-
-      // Price targets — calculated from real levels
-      const entry    = +Math.min(price, sup * 1.005).toFixed(2);
-      const tp       = +(res * 0.98).toFixed(2);           // just below resistance
-      const sl       = +(price * 0.945).toFixed(2);        // 5.5% stop loss
-      const riskAmt  = +(price - sl).toFixed(2);
-      const rewAmt   = +(tp - price).toFixed(2);
-      const rr       = riskAmt > 0 ? (rewAmt/riskAmt).toFixed(1) : '0';
-      const upsidePct= +(rewAmt/price*100).toFixed(1);
-      const downPct  = +(riskAmt/price*100).toFixed(1);
-
-      // Change from yesterday
-      const chgNum   = live.chg;
-      const chgPct   = live.chgPct;
-      const chgStr   = (chgNum>=0?'+':'')+chgNum+' ('+( chgPct>=0?'+':'')+chgPct+'%)';
-
-      // Volume
-      const volStr   = live.volRatio+'x 30-day avg';
-      const volLabel = live.volRatio>=1.5?'Above Average':live.volRatio<0.7?'Below Average':'Average';
-
-      // RSI signal
-      const rsiSig   = rsiVal>=70?'Overbought':rsiVal<=30?'Oversold':'Neutral';
-
-      // MACD
-      const macdStr  = live.macdBull?'Bullish (positive histogram)':'Bearish (negative histogram)';
-
-      // MA status
-      const ma50str  = ma50  ? `$${ma50} — price is ${live.vs50}`   : 'N/A';
-      const ma200str = ma200 ? `$${ma200} — price is ${live.vs200}` : 'N/A';
-
-      // Overall TA signal (simple rule-based)
-      let bullPoints = 0;
-      if (rsiVal < 60 && rsiVal > 30) bullPoints++;
-      if (live.macdBull) bullPoints++;
-      if (live.vs50  === 'Above') bullPoints++;
-      if (live.vs200 === 'Above') bullPoints++;
-      const taOverall = bullPoints>=4?'Strong Buy':bullPoints===3?'Buy':bullPoints===2?'Neutral':bullPoints===1?'Sell':'Strong Sell';
-      const trend     = live.vs200==='Above'?(live.vs50==='Above'?'Uptrend':'Mixed'):'Downtrend';
-
-      // Store real computed numbers to inject into card later
-      liveNumbers = {
-        ticker, price, chgStr, chgPct,
-        entry, tp, sl,
-        rr: `1:${rr}`,
-        upsidePct: `+${upsidePct}%`,
-        downPct: `-${downPct}%`,
-        rsi: rsiVal, rsiSig,
-        macdBull: live.macdBull, macdNote: macdStr,
-        ma50: ma50||null, ma200: ma200||null,
-        vs50: live.vs50, vs200: live.vs200,
-        sup, res,
-        volLabel, volStr,
-        taOverall, trend,
-        mktCap: live.mktCap,
-      };
-
-      // Tell AI the exact numbers — it only writes the analysis text
       liveCtx = `
-
-=== LIVE COMPUTED DATA FOR ${ticker} — DO NOT CHANGE ANY OF THESE NUMBERS ===
-Current Price: $${price} (${chgStr} today)
-Market Cap: ${live.mktCap||'N/A'}
-
-TECHNICAL (computed from real Yahoo Finance price history):
-RSI(14): ${rsiVal} — ${rsiSig}
-MACD: ${macdStr}
-50-day MA: ${ma50str}
-200-day MA: ${ma200str}
-20-day Support: $${sup}
-20-day Resistance: $${res}
-Volume: ${volStr} (${volLabel})
-Overall TA: ${taOverall}
-Trend: ${trend}
-
-PRICE TARGETS (pre-calculated — use these exact numbers):
-Entry: $${entry}
-Take Profit: $${tp}
-Stop Loss: $${sl}
-Risk/Reward: 1:${rr}
-Upside: +${upsidePct}%
-Downside: -${downPct}%
-
-YOUR JOB: Write ONLY the "analysis" field (3-4 sentences explaining what these numbers mean and why). 
-Also write sentiment and analyst sections based on your knowledge of ${ticker}.
-Use ALL the exact numbers above in your JSON response — do not change them.
+=== LIVE DATA FOR ${ticker} — USE THESE EXACT NUMBERS IN YOUR JSON ===
+ticker: "${ticker}"
+price: "${live.price}"
+price_change: "${live.chgPct >= 0 ? '+' : ''}${live.chgPct}% ($${live.chg >= 0 ? '+' : ''}${live.chg} today)"
+RSI(14): ${live.rsi} — ${t.rsiSig}
+MACD: ${t.macdNote}
+MA50:  ${live.ma50  ? '$' + live.ma50  + ' (price ' + live.vs50  + ')' : 'N/A (insufficient data)'}
+MA200: ${live.ma200 ? '$' + live.ma200 + ' (price ' + live.vs200 + ')' : 'N/A (need 200+ trading days)'}
+Support (20d low):    $${live.sup}
+Resistance (20d high):$${live.res}
+Volume: ${t.volStr} = ${t.volLabel}
+Market Cap: ${live.mktCap || 'N/A'}
+TA Overall: ${t.taOverall}
+Trend: ${t.trend}
+Entry:       $${t.entry}
+Take Profit: $${t.tp}
+Stop Loss:   $${t.sl}
+R/R:         ${t.rr}
+Upside:      ${t.upside}
+Downside:    ${t.downside}
+Your job: write the "analysis" text, "signal", "confidence", "sentiment", "analysts", "metrics".
+Do NOT change any prices or percentages above.
 === END LIVE DATA ===`;
     }
   }
 
-  const msgs = trimmed.map((m,i) =>
-    i===trimmed.length-1 ? {...m, content: m.content + liveCtx} : m
+  const msgs = trimmed.map((m, i) =>
+    i === trimmed.length - 1 ? { ...m, content: m.content + liveCtx } : m
   );
 
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method:'POST',
-    headers:{'Content-Type':'application/json','Authorization':`Bearer ${GROQ_KEY}`},
-    body:JSON.stringify({
-      model:'llama-3.3-70b-versatile',
-      messages:[{role:'system',content:SYSTEM},...msgs],
-      temperature:0.2,
-      max_tokens:1000
-    })
+  const res  = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${GROQ_KEY}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'system', content: SYSTEM }, ...msgs],
+      temperature: 0.2,
+      max_tokens: 900,
+    }),
   });
-
   const data = await res.json();
   if (data.error) {
     const m = data.error.message || '';
-    if (res.status===429) {
-      const secs = m.match(/([\d.]+)s/)?.[1] || '30';
-      throw new Error(`Rate limited — wait ${Math.ceil(secs)}s and try again`);
+    if (res.status === 429) {
+      const s = m.match(/([\d.]+)s/)?.[1] || '30';
+      throw new Error(`Rate limited — wait ${Math.ceil(s)}s then retry`);
     }
     throw new Error(m || `API error ${res.status}`);
   }
-
   const text = data.choices[0].message.content || '';
-  history.push({role:'assistant', content:text.slice(0,500)});
+  history.push({ role: 'assistant', content: text.slice(0, 500) });
   return { text, liveNumbers };
 }
 
-
-/* =========================================
-   PARSE + BUILD CARD
-========================================= */
+/* ── PARSE ── */
 function parse(raw) {
   try {
-    const s=raw.indexOf('{'), e=raw.lastIndexOf('}');
-    if(s<0||e<0) throw new Error('no json');
-    return JSON.parse(raw.slice(s,e+1));
+    const s = raw.indexOf('{'), e = raw.lastIndexOf('}');
+    if (s < 0 || e < 0) throw new Error('no json');
+    return JSON.parse(raw.slice(s, e + 1));
   } catch {
-    return {ticker:'?',price:'N/A',price_change:'',analysis:raw.slice(0,300),
-      signal:'HOLD',confidence:50,price_targets:null,ta:null,sentiment:null,analysts:null,
-      metrics:{sentiment:'Neutral',volatility:'Medium',timeframe:'Mid-term'}};
+    return { ticker:'?', price:'N/A', price_change:'', analysis: raw.slice(0,200),
+      signal:'HOLD', confidence:50, price_targets:null, ta:null,
+      sentiment:null, analysts:null, metrics:{sentiment:'Neutral',volatility:'Medium',timeframe:'Mid-term'} };
   }
 }
 
+/* ── BUILD CARD ── */
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
 function cc(v){return v>=70?'#10b981':v>=50?'#f59e0b':'#ef4444';}
 function sc(s){return s==='Bullish'?'#34d399':s==='Bearish'?'#f87171':'#94a3b8';}
@@ -533,77 +469,73 @@ function rc(v){return v>=70?'#ef4444':v<=30?'#10b981':'#f59e0b';}
 function scc(n){return n>=60?'#34d399':n>=40?'#f59e0b':'#f87171';}
 function tac(s){return{'Strong Buy':'sb','Buy':'bb','Neutral':'nb','Sell':'selb','Strong Sell':'ssb'}[s]||'nb';}
 
-const TIPS = {
-  rsi:'RSI measures if a stock is overbought (>70, may drop) or oversold (<30, may rise). 30-70 is neutral.',
-  macd:'MACD shows momentum direction. Bullish = upward momentum building. Bearish = downward.',
-  ma50:'50-day average price. Price above = short-term uptrend.',
-  ma200:'200-day average price. The most important long-term trend indicator.',
-  sup:'Price floor — where buyers historically step in. Good entry zone.',
-  res:'Price ceiling — where sellers appear. Good take-profit zone.',
-  entry:'Best price to open a buy position, near support level.',
-  tp:'Target price to sell for maximum gain, near resistance.',
-  sl:'Exit price if trade goes wrong — limits your losses to ~5-6%.',
-  rr:'Risk/Reward ratio. 1:3 means risking $1 to potentially make $3.',
-  conf:'How confident the AI is based on alignment of all signals.',
-  tx:'Sentiment from Twitter/X posts about this stock.',
-  rd:'Sentiment from Reddit (r/wallstreetbets, r/stocks).',
-  cons:'Wall Street analyst consensus from all published ratings.',
-  pt:'Average 12-month price target set by professional analysts.',
-};
-
-function buildCard(d) {
+function buildCard(d, liveNumbers) {
   const sig = (d.signal||'HOLD').toUpperCase();
-  const pn = parseFloat(d.price)||0;
   const cup = String(d.price_change||'').startsWith('+');
-  const isLive = pn > 0;
 
-  let ptH='', taH='', sentH='', analH='';
+  // Always use our computed numbers if available
+  let pt = null, ta = null;
+  if (liveNumbers) {
+    const { live, t } = liveNumbers;
+    pt = { entry: t.entry, take_profit: t.tp, stop_loss: t.sl,
+           risk_reward: t.rr, upside_pct: t.upside, downside_pct: t.downside };
+    ta = { rsi: live.rsi, rsi_signal: t.rsiSig,
+           macd_bullish: live.macdBull, macd_note: t.macdNote,
+           ma50: live.ma50, ma200: live.ma200,
+           price_vs_ma50: live.vs50||'N/A', price_vs_ma200: live.vs200||'N/A',
+           support: live.sup, resistance: live.res,
+           volume_vs_avg: t.volLabel, volume_note: t.volStr,
+           ta_overall: t.taOverall, trend: t.trend };
+  } else {
+    pt = d.price_targets;
+    ta = d.ta;
+  }
 
-  if(d.price_targets){
-    const p=d.price_targets;
-    ptH=`<div class="cs"><div class="cl tt" data-tip="Calculated from support/resistance levels and analyst targets">🎯 Price Targets</div>
+  let ptH = '', taH = '', sentH = '', analH = '';
+
+  if (pt) {
+    ptH = `<div class="cs"><div class="cl tt" data-tip="Calculated from real support/resistance levels">🎯 Price Targets</div>
     <div class="tgrid">
-      <div class="tbox tt" data-tip="${TIPS.entry}"><span class="tv e">$${Number(p.entry||0).toFixed(2)}</span><div class="tlbl">Entry</div></div>
-      <div class="tbox tt" data-tip="${TIPS.tp}"><span class="tv t">$${Number(p.take_profit||0).toFixed(2)}</span><div class="tlbl">Take Profit</div></div>
-      <div class="tbox tt" data-tip="${TIPS.sl}"><span class="tv s">$${Number(p.stop_loss||0).toFixed(2)}</span><div class="tlbl">Stop Loss</div></div>
+      <div class="tbox tt" data-tip="${TIPS.entry}"><span class="tv e">$${Number(pt.entry||0).toFixed(2)}</span><div class="tlbl">Entry</div></div>
+      <div class="tbox tt" data-tip="${TIPS.tp}"><span class="tv t">$${Number(pt.take_profit||0).toFixed(2)}</span><div class="tlbl">Take Profit</div></div>
+      <div class="tbox tt" data-tip="${TIPS.sl}"><span class="tv s">$${Number(pt.stop_loss||0).toFixed(2)}</span><div class="tlbl">Stop Loss</div></div>
     </div>
-    <span class="rrbadge tt" data-tip="${TIPS.rr}">⚖ R/R ${esc(p.risk_reward||'N/A')}</span>
-    ${p.upside_pct?`<span class="rrbadge" style="color:#34d399;border-color:rgba(16,185,129,.3)">▲ ${esc(p.upside_pct)}</span>`:''}
-    ${p.downside_pct?`<span class="rrbadge" style="color:#f87171;border-color:rgba(239,68,68,.3)">▼ ${esc(p.downside_pct)}</span>`:''}
+    <span class="rrbadge tt" data-tip="${TIPS.rr}">⚖ R/R ${esc(pt.risk_reward||'N/A')}</span>
+    ${pt.upside_pct?`<span class="rrbadge" style="color:#34d399;border-color:rgba(16,185,129,.3)">▲ ${esc(pt.upside_pct)}</span>`:''}
+    ${pt.downside_pct?`<span class="rrbadge" style="color:#f87171;border-color:rgba(239,68,68,.3)">▼ ${esc(pt.downside_pct)}</span>`:''}
     </div>`;
   }
 
-  if(d.ta){
-    const t=d.ta;
-    const rc2=rc(t.rsi||50);
-    const mc=t.macd_bullish?'#34d399':'#f87171';
-    const vc=t.volume_vs_avg==='Above Average'?'#34d399':t.volume_vs_avg==='Below Average'?'#f87171':'#94a3b8';
-    const tc=t.trend==='Uptrend'?'#34d399':t.trend==='Downtrend'?'#f87171':'#94a3b8';
-    taH=`<div class="cs"><div class="cl">⚡ Technical Indicators</div>
+  if (ta) {
+    const rc2 = rc(ta.rsi||50);
+    const mc  = ta.macd_bullish?'#34d399':'#f87171';
+    const vc  = ta.volume_vs_avg==='Above Average'?'#34d399':ta.volume_vs_avg==='Below Average'?'#f87171':'#94a3b8';
+    const tc  = ta.trend==='Uptrend'?'#34d399':ta.trend==='Downtrend'?'#f87171':'#94a3b8';
+    taH = `<div class="cs"><div class="cl">⚡ Technical Indicators <span style="color:var(--green);font-size:8px">● REAL DATA</span></div>
     <div class="ta2">
-      <div class="tabox tt" data-tip="${TIPS.rsi}"><div class="tan">RSI (14)</div><div class="tav" style="color:${rc2}">${t.rsi!=null?Number(t.rsi).toFixed(1):'N/A'}</div><div class="tanote">${esc(t.rsi_signal||'')}</div><div class="tabar"><div class="tabarf" style="width:${Math.min(100,t.rsi||50)}%;background:${rc2}"></div></div><div class="mazones"><span>OS 30</span><span>70 OB</span></div></div>
-      <div class="tabox tt" data-tip="${TIPS.macd}"><div class="tan">MACD</div><div class="tav" style="color:${mc}">${t.macd_bullish?'▲ Bullish':'▼ Bearish'}</div><div class="tanote">${esc(t.macd_note||'')}</div></div>
-      <div class="tabox tt" data-tip="Volume vs 30-day average. High volume confirms price moves."><div class="tan">Volume</div><div class="tav" style="color:${vc}">${esc(t.volume_vs_avg||'N/A')}</div><div class="tanote">${esc(t.volume_note||'')}</div></div>
-      <div class="tabox"><div class="tan">Trend</div><div class="tav" style="color:${tc}">${esc(t.trend||'N/A')}</div><div class="tanote">Overall direction</div></div>
+      <div class="tabox tt" data-tip="${TIPS.rsi}"><div class="tan">RSI (14)</div><div class="tav" style="color:${rc2}">${ta.rsi!=null?Number(ta.rsi).toFixed(1):'N/A'}</div><div class="tanote">${esc(ta.rsi_signal||'')}</div><div class="tabar"><div class="tabarf" style="width:${Math.min(100,ta.rsi||50)}%;background:${rc2}"></div></div><div class="mazones"><span>OS 30</span><span>70 OB</span></div></div>
+      <div class="tabox tt" data-tip="${TIPS.macd}"><div class="tan">MACD</div><div class="tav" style="color:${mc}">${ta.macd_bullish?'▲ Bullish':'▼ Bearish'}</div><div class="tanote">${esc(ta.macd_note||'')}</div></div>
+      <div class="tabox tt" data-tip="Volume vs 30-day average. High volume confirms moves."><div class="tan">Volume</div><div class="tav" style="color:${vc}">${esc(ta.volume_vs_avg||'N/A')}</div><div class="tanote">${esc(ta.volume_note||'')}</div></div>
+      <div class="tabox"><div class="tan">Trend</div><div class="tav" style="color:${tc}">${esc(ta.trend||'N/A')}</div><div class="tanote">Overall direction</div></div>
     </div>
     <div style="margin-top:6px"><div class="cl" style="margin-bottom:3px">Moving Averages</div>
     <div class="mapills">
-      <span class="mapill ${t.price_vs_ma50==='Above'?'ab':'bl'} tt" data-tip="${TIPS.ma50}">MA50 $${t.ma50!=null?Number(t.ma50).toFixed(2):'N/A'} (${esc(t.price_vs_ma50||'?')})</span>
-      <span class="mapill ${t.price_vs_ma200==='Above'?'ab':'bl'} tt" data-tip="${TIPS.ma200}">MA200 $${t.ma200!=null?Number(t.ma200).toFixed(2):'N/A'} (${esc(t.price_vs_ma200||'?')})</span>
+      <span class="mapill ${ta.price_vs_ma50==='Above'?'ab':'bl'} tt" data-tip="${TIPS.ma50}">MA50 ${ta.ma50?'$'+Number(ta.ma50).toFixed(2):'N/A'} (${esc(ta.price_vs_ma50||'?')})</span>
+      <span class="mapill ${ta.price_vs_ma200==='Above'?'ab':'bl'} tt" data-tip="${TIPS.ma200}">MA200 ${ta.ma200?'$'+Number(ta.ma200).toFixed(2):'N/A'} (${esc(ta.price_vs_ma200||'?')})</span>
     </div></div>
     <div style="margin-top:6px"><div class="cl" style="margin-bottom:3px">Support &amp; Resistance</div>
     <div class="lvrow">
-      <div class="lvbox tt" data-tip="${TIPS.sup}"><div class="lvv sup">$${t.support!=null?Number(t.support).toFixed(2):'N/A'}</div><div class="lvlbl">▲ Support</div></div>
-      <div class="lvbox tt" data-tip="${TIPS.res}"><div class="lvv res">$${t.resistance!=null?Number(t.resistance).toFixed(2):'N/A'}</div><div class="lvlbl">▼ Resistance</div></div>
+      <div class="lvbox tt" data-tip="${TIPS.sup}"><div class="lvv sup">$${ta.support!=null?Number(ta.support).toFixed(2):'N/A'}</div><div class="lvlbl">▲ Support (20d low)</div></div>
+      <div class="lvbox tt" data-tip="${TIPS.res}"><div class="lvv res">$${ta.resistance!=null?Number(ta.resistance).toFixed(2):'N/A'}</div><div class="lvlbl">▼ Resistance (20d high)</div></div>
     </div></div>
-    <div style="margin-top:6px"><span class="tabadge ${tac(t.ta_overall||'Neutral')}">${esc(t.ta_overall||'Neutral')}</span></div>
+    <div style="margin-top:6px"><span class="tabadge ${tac(ta.ta_overall||'Neutral')}">${esc(ta.ta_overall||'Neutral')}</span></div>
     <a href="https://finance.yahoo.com/chart/${esc(d.ticker||'')}" target="_blank" style="display:block;margin-top:7px;font-family:var(--mono);font-size:10px;color:var(--accent);text-decoration:none;">📊 Open live chart on Yahoo Finance →</a>
     </div>`;
   }
 
-  if(d.sentiment){
-    const s=d.sentiment;
-    sentH=`<div class="cs"><div class="cl">🐦 Social Sentiment</div>
+  if (d.sentiment) {
+    const s = d.sentiment;
+    sentH = `<div class="cs"><div class="cl">🐦 Social Sentiment</div>
     <div class="sentrow">
       <div class="sentbox tt" data-tip="${TIPS.tx}"><span class="sicon">𝕏</span><div class="sval" style="color:${scc(s.twitter_x_score||50)}">${esc(s.twitter_x||'N/A')}</div><div class="ssub">${esc(s.twitter_x_note||'')}</div><div class="sbar"><div class="sbarf" style="width:${s.twitter_x_score||50}%;background:${scc(s.twitter_x_score||50)}"></div></div></div>
       <div class="sentbox tt" data-tip="${TIPS.rd}"><span class="sicon">🤖</span><div class="sval" style="color:${scc(s.reddit_score||50)}">${esc(s.reddit||'N/A')}</div><div class="ssub">${esc(s.reddit_note||'')}</div><div class="sbar"><div class="sbarf" style="width:${s.reddit_score||50}%;background:${scc(s.reddit_score||50)}"></div></div></div>
@@ -611,10 +543,10 @@ function buildCard(d) {
     </div></div>`;
   }
 
-  if(d.analysts){
-    const a=d.analysts;
-    const ac=(a.consensus||'hold').toLowerCase().replace(' ','-');
-    analH=`<div class="cs"><div class="cl">🏦 Wall Street Analysts</div>
+  if (d.analysts) {
+    const a  = d.analysts;
+    const ac = (a.consensus||'hold').toLowerCase().replace(' ','-');
+    analH = `<div class="cs"><div class="cl">🏦 Wall Street Analysts</div>
     <div class="atop">
       <span class="apill ${ac} tt" data-tip="${TIPS.cons}">${esc(a.consensus||'N/A')}</span>
       <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">${a.num_analysts||'?'} analysts</span>
@@ -627,11 +559,13 @@ function buildCard(d) {
     </div></div>`;
   }
 
+  const pn  = parseFloat(d.price) || 0;
+  const conf = d.confidence || 50;
   return `<div class="card">
     <div class="cs">
-      ${isLive?'<div class="live-badge">📡 Live Data</div>':''}
+      <div class="live-badge">📡 Live Data</div>
       <div class="phero">
-        <span class="pmain">${pn?'$'+pn.toFixed(2):esc(d.price)}</span>
+        <span class="pmain">${pn ? '$'+pn.toFixed(2) : esc(d.price)}</span>
         <span class="${cup?'pup':'pdn'}">${esc(d.price_change)}</span>
       </div>
       <div class="cl">${esc(d.ticker||'')} — Analysis</div>
@@ -640,7 +574,7 @@ function buildCard(d) {
     </div>
     ${ptH}${taH}${sentH}${analH}
     <div class="cs"><div class="cl tt" data-tip="${TIPS.conf}">Confidence</div>
-      <div class="cbar"><div class="ctrack"><div class="cfill" style="width:${d.confidence||50}%;background:${cc(d.confidence||50)}"></div></div><div class="cval" style="color:${cc(d.confidence||50)}">${d.confidence||50}%</div></div>
+      <div class="cbar"><div class="ctrack"><div class="cfill" style="width:${conf}%;background:${cc(conf)}"></div></div><div class="cval" style="color:${cc(conf)}">${conf}%</div></div>
     </div>
     <div class="cs"><div class="cl">Market Snapshot</div>
       <div class="mgrid">
@@ -652,271 +586,129 @@ function buildCard(d) {
   </div>`;
 }
 
-/* =========================================
-   DOM HELPERS
-========================================= */
+/* ── DOM ── */
 function addMsg(role, html) {
   const w = document.getElementById('msgs');
   const d = document.createElement('div');
   d.className = 'msg ' + role;
   d.innerHTML = '<div class="mlbl">'+(role==='user'?'You':'StockAI')+'</div><div class="bbl">'+html+'</div>';
-  w.appendChild(d);
-  w.scrollTop = w.scrollHeight;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
-
 function addCard(bubble, cardHtml) {
   const w = document.getElementById('msgs');
   const d = document.createElement('div');
-  d.className = 'msg bot';
-  d.style.maxWidth = '100%';
+  d.className = 'msg bot'; d.style.maxWidth = '100%';
   d.innerHTML = '<div class="mlbl">StockAI</div><div class="bbl">'+bubble+'</div>'+cardHtml;
-  w.appendChild(d);
-  w.scrollTop = w.scrollHeight;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
-
 function showTyping() {
   const w = document.getElementById('msgs');
   const d = document.createElement('div');
-  d.id = 'typing';
-  d.className = 'msg bot';
+  d.id = 'typing'; d.className = 'msg bot';
   d.innerHTML = '<div class="mlbl">StockAI</div><div class="bbl"><div class="slbl" id="tlbl">Fetching live data...</div><div class="typing"><span></span><span></span><span></span></div></div>';
-  w.appendChild(d);
-  w.scrollTop = w.scrollHeight;
+  w.appendChild(d); w.scrollTop = w.scrollHeight;
 }
+function hideTyping() { const t=document.getElementById('typing'); if(t) t.remove(); }
+function setTypingLabel(txt) { const e=document.getElementById('tlbl'); if(e) e.textContent=txt; }
+function esc2(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
-function hideTyping() {
-  const t = document.getElementById('typing');
-  if (t) t.remove();
-}
-
-function setTypingLabel(txt) {
-  const el = document.getElementById('tlbl');
-  if (el) el.textContent = txt;
-}
-
-/* =========================================
-   SEND MESSAGE
-========================================= */
+/* ── SEND ── */
 async function send() {
   const inp = document.getElementById('txt');
   const btn = document.getElementById('sbtn');
   const msg = inp.value.trim();
   if (!msg) return;
-
-  inp.value = '';
-  btn.disabled = true;
-  addMsg('user', esc(msg));
+  inp.value = ''; btn.disabled = true;
+  addMsg('user', esc2(msg));
   showTyping();
-
   try {
-    const { text: raw, liveNumbers } = await callAI(msg);
+    const { text, liveNumbers } = await callAI(msg);
     hideTyping();
-    const d = parse(raw);
-
-    // Override AI-invented numbers with our real computed values
+    const d = parse(text);
+    // Patch price/change from live data so it's never wrong
     if (liveNumbers) {
-      d.ticker      = liveNumbers.ticker;
-      d.price       = String(liveNumbers.price);
-      d.price_change= (liveNumbers.chgPct>=0?'+':'')+liveNumbers.chgPct+'%';
-
-      d.price_targets = {
-        entry:        liveNumbers.entry,
-        take_profit:  liveNumbers.tp,
-        stop_loss:    liveNumbers.sl,
-        risk_reward:  liveNumbers.rr,
-        upside_pct:   liveNumbers.upsidePct,
-        downside_pct: liveNumbers.downPct,
-      };
-
-      if (!d.ta) d.ta = {};
-      d.ta.rsi          = liveNumbers.rsi;
-      d.ta.rsi_signal   = liveNumbers.rsiSig;
-      d.ta.macd_bullish = liveNumbers.macdBull;
-      d.ta.macd_note    = liveNumbers.macdNote;
-      d.ta.ma50         = liveNumbers.ma50;
-      d.ta.ma200        = liveNumbers.ma200;
-      d.ta.price_vs_ma50  = liveNumbers.vs50  || 'N/A';
-      d.ta.price_vs_ma200 = liveNumbers.vs200 || 'N/A';
-      d.ta.support      = liveNumbers.sup;
-      d.ta.resistance   = liveNumbers.res;
-      d.ta.volume_vs_avg= liveNumbers.volLabel;
-      d.ta.volume_note  = liveNumbers.volStr;
-      d.ta.ta_overall   = liveNumbers.taOverall;
-      d.ta.trend        = liveNumbers.trend;
+      d.ticker       = liveNumbers.live.ticker;
+      d.price        = String(liveNumbers.live.price);
+      d.price_change = (liveNumbers.live.chgPct >= 0 ? '+' : '') + liveNumbers.live.chgPct + '%';
     }
-
-    addCard('📡 Live Analysis:', buildCard(d));
+    addCard('📡 Live Analysis:', buildCard(d, liveNumbers));
   } catch(e) {
     hideTyping();
-    addMsg('bot', '<span style="color:#f87171">⚠ ' + esc(e.message) + '</span>');
+    addMsg('bot', '<span style="color:#f87171">⚠ ' + esc2(e.message) + '</span>');
   }
-
-  btn.disabled = false;
-  inp.focus();
+  btn.disabled = false; inp.focus();
 }
-
-function ask(msg) {
-  document.getElementById('txt').value = msg;
-  send();
-}
-
-// Wire up button and enter key
+function ask(t) { document.getElementById('txt').value = t; send(); }
 document.getElementById('sbtn').addEventListener('click', send);
-document.getElementById('txt').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') send();
-});
+document.getElementById('txt').addEventListener('keydown', e => { if (e.key==='Enter') send(); });
 
-/* =========================================
-   TRADING SIMULATION
-========================================= */
-const SIM_TICKERS = ['NVDA','AAPL','TSLA','MSFT'];
-const BASE = {NVDA:142,AAPL:211,TSLA:248,MSFT:422};
-const VOL  = {NVDA:.018,AAPL:.009,TSLA:.025,MSFT:.010};
-const MAX_H = 120;
-
-const simPrices = {};
-const simHistory = {};
-SIM_TICKERS.forEach(t => { simPrices[t]=BASE[t]; simHistory[t]=[]; });
-
-const agent = {
-  cash:10000, holdings:{}, trades:0, wins:0, reward:0,
-  gen:1, epsilon:1.0,
-  weights:[0.25,0.25,0.25,0.25],
-  start:10000
-};
-
-function simRSI(h,n=14){if(h.length<n+1)return 50;let g=0,l=0;for(let i=h.length-n;i<h.length;i++){const d=h[i]-h[i-1];d>0?g+=d:l+=Math.abs(d);}const rs=(g/n)/((l/n)||.0001);return 100-(100/(1+rs));}
-function simMom(h,n=10){if(h.length<n)return 0;return(h[h.length-1]-h[h.length-n])/h[h.length-n];}
-function simZ(h,n=20){if(h.length<n)return 0;const sl=h.slice(-n),mn=sl.reduce((a,b)=>a+b)/n,sd=Math.sqrt(sl.reduce((a,b)=>a+(b-mn)**2,0)/n);return sd?(h[h.length-1]-mn)/sd:0;}
-
-function decide(ticker){
-  const h=simHistory[ticker];if(h.length<20)return'HOLD';
-  const rsiV=simRSI(h),mom=simMom(h),z=simZ(h);
-  const hold=agent.holdings[ticker];
-  if(Math.random()<agent.epsilon){const r=Math.random();return r<.33?'BUY':r<.66?'SELL':'HOLD';}
-  const rs=rsiV<35?1:rsiV>65?-1:0;
-  const ms=mom>.01?1:mom<-.01?-1:0;
-  const zs=z<-1.5?1:z>1.5?-1:0;
-  const hs=hold?(simPrices[ticker]>hold.buy*1.08?-1:simPrices[ticker]<hold.buy*.94?-1:0):0;
-  const score=agent.weights[0]*rs+agent.weights[1]*ms+agent.weights[2]*zs+agent.weights[3]*hs;
-  if(!hold&&score>.15)return'BUY';
-  if(hold&&score<-.1)return'SELL';
-  return'HOLD';
-}
-
-function learn(reward){
-  const lr=.05;
-  agent.weights=agent.weights.map((w,i)=>reward>0?Math.min(.7,w+lr*reward*.01*(i===1?1.5:1)):Math.max(.05,w+lr*reward*.01));
-  const sum=agent.weights.reduce((a,b)=>a+b);
-  agent.weights=agent.weights.map(w=>w/sum);
-  agent.epsilon=Math.max(.05,agent.epsilon*.9995);
-  agent.reward+=reward;
-}
-
-let tick=0;
+/* ── SIMULATION ── */
+const ST=['NVDA','AAPL','TSLA','MSFT'];
+const BASE={NVDA:142,AAPL:211,TSLA:248,MSFT:422};
+const VOL={NVDA:.018,AAPL:.009,TSLA:.025,MSFT:.010};
+const sp={},sh={};
+ST.forEach(t=>{sp[t]=BASE[t];sh[t]=[];});
+const ag={cash:10000,hold:{},trades:0,wins:0,reward:0,gen:1,eps:1.0,w:[.25,.25,.25,.25],start:10000};
+function sRSI(h,n=14){if(h.length<n+1)return 50;let g=0,l=0;for(let i=h.length-n;i<h.length;i++){const d=h[i]-h[i-1];d>0?g+=d:l+=Math.abs(d);}return 100-(100/((g/n)/((l/n)||.0001)+1));}
+function sMom(h,n=10){return h.length<n?0:(h[h.length-1]-h[h.length-n])/h[h.length-n];}
+function sZ(h,n=20){if(h.length<n)return 0;const s=h.slice(-n),m=s.reduce((a,b)=>a+b)/n,sd=Math.sqrt(s.reduce((a,b)=>a+(b-m)**2,0)/n);return sd?(h[h.length-1]-m)/sd:0;}
+function decide(t){const h=sh[t];if(h.length<20)return'HOLD';const r=sRSI(h),mo=sMom(h),z=sZ(h),ho=ag.hold[t];if(Math.random()<ag.eps){const x=Math.random();return x<.33?'BUY':x<.66?'SELL':'HOLD';}const rs=r<35?1:r>65?-1:0,ms=mo>.01?1:mo<-.01?-1:0,zs=z<-1.5?1:z>1.5?-1:0,hs=ho?(sp[t]>ho.b*1.08?-1:sp[t]<ho.b*.94?-1:0):0;const sc2=ag.w[0]*rs+ag.w[1]*ms+ag.w[2]*zs+ag.w[3]*hs;if(!ho&&sc2>.15)return'BUY';if(ho&&sc2<-.1)return'SELL';return'HOLD';}
+function learn(reward){const lr=.05;ag.w=ag.w.map((w,i)=>reward>0?Math.min(.7,w+lr*reward*.01*(i===1?1.5:1)):Math.max(.05,w+lr*reward*.01));const sm=ag.w.reduce((a,b)=>a+b);ag.w=ag.w.map(w=>w/sm);ag.eps=Math.max(.05,ag.eps*.9995);ag.reward+=reward;}
+let tick=0,lc=0;
 function simTick(){
   tick++;
-  SIM_TICKERS.forEach((t,i)=>{
-    const p=simPrices[t],b=BASE[t];
-    const rv=(b-p)/b*.1;
-    const sh=tick%200===0?(Math.random()-.5)*.04:0;
-    const dr=(Math.random()-.49)*VOL[t]+rv*.1+sh;
-    simPrices[t]=Math.max(p*.5,p*(1+dr));
-    simHistory[t].push(simPrices[t]);
-    if(simHistory[t].length>MAX_H)simHistory[t].shift();
-    const pct=((simPrices[t]-BASE[t])/BASE[t]*100);
-    const pe=document.getElementById('pct-'+i);
-    const ce=document.getElementById('cp-'+i);
+  ST.forEach((t,i)=>{
+    const p=sp[t],b=BASE[t],rv=(b-p)/b*.1,sh2=tick%200===0?(Math.random()-.5)*.04:0,dr=(Math.random()-.49)*VOL[t]+rv*.1+sh2;
+    sp[t]=Math.max(p*.5,p*(1+dr));sh[t].push(sp[t]);if(sh[t].length>120)sh[t].shift();
+    const pct=((sp[t]-BASE[t])/BASE[t]*100);
+    const pe=document.getElementById('pct-'+i),ce=document.getElementById('cp-'+i);
     if(pe){pe.textContent=(pct>=0?'+':'')+pct.toFixed(2)+'%';pe.style.color=pct>=0?'#10b981':'#ef4444';}
-    if(ce)ce.textContent='$'+simPrices[t].toFixed(2);
+    if(ce)ce.textContent='$'+sp[t].toFixed(2);
   });
-
-  if(tick%5===0){
-    SIM_TICKERS.forEach(t=>{
-      const action=decide(t),price=simPrices[t],hold=agent.holdings[t];
-      if(action==='BUY'&&!hold&&agent.cash>=price){
-        const sh=Math.floor(agent.cash*.25/price);
-        if(sh>0){agent.cash-=sh*price;agent.holdings[t]={shares:sh,buy:price};simLog('buy',t,price,sh);}
-      } else if(action==='SELL'&&hold){
-        const pnl=hold.shares*(price-hold.buy);
-        agent.cash+=hold.shares*price;
-        agent.trades++;if(pnl>0)agent.wins++;
-        learn(pnl);simLog('sell',t,price,hold.shares,pnl);
-        delete agent.holdings[t];
-        if(agent.trades%20===0){agent.gen++;document.getElementById('gen-lbl').textContent='Generation '+agent.gen;simLog('gen');}
-      }
-    });
-  }
-
-  SIM_TICKERS.forEach((t,i)=>drawChart(i,t));
-
-  let hv=0;
-  SIM_TICKERS.forEach(t=>{if(agent.holdings[t])hv+=agent.holdings[t].shares*simPrices[t];});
-  const port=agent.cash+hv,pnl=port-agent.start;
-  const wr=agent.trades>0?Math.round(agent.wins/agent.trades*100):0;
-  document.getElementById('s-port').textContent='$'+port.toFixed(2);
-  document.getElementById('s-port').style.color=port>=10000?'#34d399':'#f87171';
-  document.getElementById('s-pnl').textContent=(pnl>=0?'+':'')+' $'+pnl.toFixed(2);
-  document.getElementById('s-pnl').style.color=pnl>=0?'#34d399':'#f87171';
-  document.getElementById('s-trades').textContent=agent.trades;
-  document.getElementById('s-wr').textContent=wr+'%';
-  document.getElementById('s-wr').style.color=wr>=50?'#34d399':'#f87171';
-  document.getElementById('s-reward').textContent=agent.reward.toFixed(2);
-  document.getElementById('s-reward').style.color=agent.reward>=0?'#34d399':'#f87171';
-  document.getElementById('s-eps').textContent=Math.round(agent.epsilon*100)+'%';
+  if(tick%5===0){ST.forEach(t=>{const ac=decide(t),pr=sp[t],ho=ag.hold[t];if(ac==='BUY'&&!ho&&ag.cash>=pr){const s=Math.floor(ag.cash*.25/pr);if(s>0){ag.cash-=s*pr;ag.hold[t]={shares:s,b:pr};sLog('buy',t,pr,s);}}else if(ac==='SELL'&&ho){const pnl=ho.shares*(pr-ho.b);ag.cash+=ho.shares*pr;ag.trades++;if(pnl>0)ag.wins++;learn(pnl);sLog('sell',t,pr,ho.shares,pnl);delete ag.hold[t];if(ag.trades%20===0){ag.gen++;document.getElementById('gen-lbl').textContent='Generation '+ag.gen;sLog('gen');}}});}
+  ST.forEach((t,i)=>drawChart(i,t));
+  let hv=0;ST.forEach(t=>{if(ag.hold[t])hv+=ag.hold[t].shares*sp[t];});
+  const port=ag.cash+hv,pnl=port-ag.start,wr=ag.trades>0?Math.round(ag.wins/ag.trades*100):0;
+  document.getElementById('s-port').textContent='$'+port.toFixed(2);document.getElementById('s-port').style.color=port>=10000?'#34d399':'#f87171';
+  document.getElementById('s-pnl').textContent=(pnl>=0?'+':'')+' $'+pnl.toFixed(2);document.getElementById('s-pnl').style.color=pnl>=0?'#34d399':'#f87171';
+  document.getElementById('s-trades').textContent=ag.trades;
+  document.getElementById('s-wr').textContent=wr+'%';document.getElementById('s-wr').style.color=wr>=50?'#34d399':'#f87171';
+  document.getElementById('s-reward').textContent=ag.reward.toFixed(2);document.getElementById('s-reward').style.color=ag.reward>=0?'#34d399':'#f87171';
+  document.getElementById('s-eps').textContent=Math.round(ag.eps*100)+'%';
 }
-
 function drawChart(idx,ticker){
-  const canvas=document.getElementById('cv-'+idx);
-  const cell=document.getElementById('cell-'+idx);
+  const canvas=document.getElementById('cv-'+idx),cell=document.getElementById('cell-'+idx);
   if(!canvas||!cell)return;
-  const headerH=cell.querySelector('.clabel').offsetHeight;
-  canvas.width=cell.offsetWidth;
-  canvas.height=cell.offsetHeight-headerH;
-  const ctx=canvas.getContext('2d');
-  const hist=simHistory[ticker];
+  const hh=cell.querySelector('.clabel').offsetHeight;
+  canvas.width=cell.offsetWidth;canvas.height=cell.offsetHeight-hh;
+  const ctx=canvas.getContext('2d'),hist=sh[ticker];
   if(hist.length<2)return;
-  const W=canvas.width,H=canvas.height,pad=4;
-  const mn=Math.min(...hist),mx=Math.max(...hist),range=mx-mn||1;
-  const toY=v=>H-pad-((v-mn)/range)*(H-pad*2);
-  const toX=(_,i)=>pad+(i/(hist.length-1))*(W-pad*2);
+  const W=canvas.width,H=canvas.height,pad=4,mn=Math.min(...hist),mx=Math.max(...hist),rng=mx-mn||1;
+  const toY=v=>H-pad-((v-mn)/rng)*(H-pad*2),toX=(_,i)=>pad+(i/(hist.length-1))*(W-pad*2);
   ctx.clearRect(0,0,W,H);
   ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;
   for(let g=0;g<4;g++){const y=pad+(g/3)*(H-pad*2);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   const up=hist[hist.length-1]>=hist[0];
   const gr=ctx.createLinearGradient(0,0,0,H);
-  gr.addColorStop(0,up?'rgba(16,185,129,.2)':'rgba(239,68,68,.2)');
-  gr.addColorStop(1,'rgba(0,0,0,0)');
+  gr.addColorStop(0,up?'rgba(16,185,129,.2)':'rgba(239,68,68,.2)');gr.addColorStop(1,'rgba(0,0,0,0)');
   ctx.beginPath();ctx.moveTo(toX(null,0),toY(hist[0]));
   hist.forEach((v,i)=>ctx.lineTo(toX(null,i),toY(v)));
-  ctx.lineTo(toX(null,hist.length-1),H);ctx.lineTo(toX(null,0),H);
-  ctx.closePath();ctx.fillStyle=gr;ctx.fill();
+  ctx.lineTo(toX(null,hist.length-1),H);ctx.lineTo(toX(null,0),H);ctx.closePath();ctx.fillStyle=gr;ctx.fill();
   ctx.beginPath();ctx.strokeStyle=up?'#10b981':'#ef4444';ctx.lineWidth=1.5;ctx.lineJoin='round';
-  hist.forEach((v,i)=>i===0?ctx.moveTo(toX(null,i),toY(v)):ctx.lineTo(toX(null,i),toY(v)));
-  ctx.stroke();
-  const h=agent.holdings[ticker];
-  if(h){const bx=toX(null,hist.length-1)-8,by=toY(h.buy);ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);ctx.fillStyle='#3b82f6';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();}
+  hist.forEach((v,i)=>i===0?ctx.moveTo(toX(null,i),toY(v)):ctx.lineTo(toX(null,i),toY(v)));ctx.stroke();
+  const h=ag.hold[ticker];
+  if(h){const bx=toX(null,hist.length-1)-8,by=toY(h.b);ctx.beginPath();ctx.arc(bx,by,4,0,Math.PI*2);ctx.fillStyle='#3b82f6';ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1;ctx.stroke();}
 }
-
-let logCount=0;
-function simLog(type,ticker,price,shares,pnl){
+function sLog(type,ticker,price,shares,pnl){
   const log=document.getElementById('ai-log');
-  const t=new Date();
-  const ts=String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
+  const t=new Date(),ts=String(t.getMinutes()).padStart(2,'0')+':'+String(t.getSeconds()).padStart(2,'0');
   const d=document.createElement('div');d.className='ll';
-  if(type==='gen'){
-    d.innerHTML=`<span class="lt">${ts}</span><span style="color:#c4b5fd">🧠 Gen ${agent.gen} — weights: [${agent.weights.map(w=>w.toFixed(2)).join(', ')}]</span>`;
-  } else if(type==='buy'){
-    d.innerHTML=`<span class="lt">${ts}</span><span class="lb">BUY ${shares}x ${ticker} @ $${price.toFixed(2)}</span>`;
-  } else if(type==='sell'){
-    const cl=pnl>=0?'lp':'ln';
-    d.innerHTML=`<span class="lt">${ts}</span><span class="ls">SELL ${shares}x ${ticker} @ $${price.toFixed(2)}</span> <span class="${cl}">${pnl>=0?'+':''}$${pnl.toFixed(2)}</span>`;
-  }
-  log.appendChild(d);log.scrollTop=log.scrollHeight;
-  logCount++;if(logCount>200)log.removeChild(log.firstChild);
+  if(type==='gen')d.innerHTML=`<span class="lt">${ts}</span><span style="color:#c4b5fd">🧠 Gen ${ag.gen} weights: [${ag.w.map(w=>w.toFixed(2)).join(', ')}]</span>`;
+  else if(type==='buy')d.innerHTML=`<span class="lt">${ts}</span><span class="lb">BUY ${shares}x ${ticker} @ $${price.toFixed(2)}</span>`;
+  else if(type==='sell'){const cl=pnl>=0?'lp':'ln';d.innerHTML=`<span class="lt">${ts}</span><span class="ls">SELL ${shares}x ${ticker} @ $${price.toFixed(2)}</span> <span class="${cl}">${pnl>=0?'+':''}$${pnl.toFixed(2)}</span>`;}
+  log.appendChild(d);log.scrollTop=log.scrollHeight;lc++;if(lc>200)log.removeChild(log.firstChild);
 }
-
-setInterval(simTick, 300);
+setInterval(simTick,300);
 </script>
 </body>
 </html>
