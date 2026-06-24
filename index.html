@@ -138,6 +138,10 @@ canvas{width:100%!important;flex:1;display:block;}
 #ai-log::-webkit-scrollbar{width:3px;}
 #ai-log::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
 .ll{font-family:var(--mono);font-size:10px;line-height:1.8;display:flex;gap:8px;}
+#resize-bar{width:100%;padding:4px 12px;background:var(--bg3);border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+#resize-bar label{font-family:var(--mono);font-size:9px;color:var(--muted);white-space:nowrap;}
+#sim-slider{flex:1;accent-color:var(--accent);cursor:pointer;}
+#sim-size-lbl{font-family:var(--mono);font-size:9px;color:var(--accent);min-width:28px;text-align:right;}
 .lt{color:var(--muted);}.lb{color:#34d399;}.ls{color:#f87171;}.lh{color:var(--muted);}
 .lp{color:#34d399;font-weight:600;}.ln{color:#f87171;font-weight:600;}
 </style>
@@ -194,6 +198,11 @@ canvas{width:100%!important;flex:1;display:block;}
     <div class="ccell" id="cell-3"><div class="clabel"><span class="cticker">MSFT</span><span id="pct-3" style="margin-left:4px"></span><span id="cp-3" style="margin-left:auto"></span></div><canvas id="cv-3"></canvas></div>
   </div>
   <div id="ai-log"><div class="ll"><span class="lt">00:00</span><span class="lh">Simulation started...</span></div></div>
+  <div id="resize-bar">
+    <label>SIM SIZE</label>
+    <input type="range" id="sim-slider" min="0" max="80" value="50" step="1" oninput="resizeSim(this.value)">
+    <span id="sim-size-lbl">50%</span>
+  </div>
 </div>
 </div>
 
@@ -707,6 +716,24 @@ function sLog(type,ticker,price,shares,pnl){
   else if(type==='buy')d.innerHTML=`<span class="lt">${ts}</span><span class="lb">BUY ${shares}x ${ticker} @ $${price.toFixed(2)}</span>`;
   else if(type==='sell'){const cl=pnl>=0?'lp':'ln';d.innerHTML=`<span class="lt">${ts}</span><span class="ls">SELL ${shares}x ${ticker} @ $${price.toFixed(2)}</span> <span class="${cl}">${pnl>=0?'+':''}$${pnl.toFixed(2)}</span>`;}
   log.appendChild(d);log.scrollTop=log.scrollHeight;lc++;if(lc>200)log.removeChild(log.firstChild);
+}
+function resizeSim(val) {
+  const pct = parseInt(val);
+  document.getElementById('sim-size-lbl').textContent = pct + '%';
+  const right = document.getElementById('right');
+  const left  = document.getElementById('left');
+  if (pct === 0) {
+    right.style.display = 'none';
+    left.style.width = '100%';
+  } else {
+    right.style.display = 'flex';
+    // right panel takes pct% of total width, left gets the rest
+    const rightW = pct + '%';
+    const leftW  = (100 - pct) + '%';
+    right.style.flex = 'none';
+    right.style.width = rightW;
+    left.style.width  = leftW;
+  }
 }
 setInterval(simTick,300);
 </script>
