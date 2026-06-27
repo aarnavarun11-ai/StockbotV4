@@ -227,10 +227,64 @@ canvas{width:100%!important;flex:1;display:block;}
 .nav-btn .nav-icon{font-size:20px;line-height:1;}
 .nav-btn.active{color:var(--accent);}
 .disc{font-size:9px;font-family:var(--mono);color:var(--muted);text-align:center;padding:4px;background:var(--bg2);flex-shrink:0;}
+
+/* ── INSTALL MODAL ── */
+#install-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:99999;display:flex;align-items:flex-end;justify-content:center;padding:0 0 env(safe-area-inset-bottom,0px);}
+#install-modal.hidden{display:none;}
+#install-box{background:#0f1520;border:1px solid rgba(255,255,255,.15);border-radius:20px 20px 0 0;width:100%;max-width:480px;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));}
+#install-box h2{font-size:18px;font-weight:700;color:#e2e8f0;margin-bottom:4px;}
+#install-box .sub{font-size:12px;color:#64748b;font-family:'IBM Plex Mono',monospace;margin-bottom:18px;}
+.install-steps{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+.istep{display:flex;align-items:flex-start;gap:12px;}
+.istep-num{width:28px;height:28px;border-radius:50%;background:#3b82f6;color:#fff;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.istep-text{font-size:14px;color:#cbd5e1;line-height:1.5;}
+.istep-text strong{color:#e2e8f0;}
+.install-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.itab{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:transparent;color:#64748b;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;cursor:pointer;text-align:center;}
+.itab.active{background:#3b82f6;border-color:#3b82f6;color:#fff;}
+.install-content{display:none;}.install-content.active{display:block;}
+#install-close{width:100%;padding:14px;background:#3b82f6;color:#fff;border:none;border-radius:12px;font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.04em;}
+#install-close:active{opacity:.85;}
+.share-icon{display:inline-block;background:#3b82f6;color:#fff;border-radius:5px;padding:1px 6px;font-size:11px;font-weight:700;margin:0 2px;}
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- INSTALL MODAL -->
+  <div id="install-modal" class="hidden">
+    <div id="install-box">
+      <h2>📲 Install StockAI</h2>
+      <div class="sub">Add to your home screen — works like a real app</div>
+      <div class="install-tabs">
+        <button class="itab active" onclick="switchInstallTab('ios')">🍎 iPhone</button>
+        <button class="itab" onclick="switchInstallTab('android')">🤖 Android</button>
+      </div>
+      <!-- iOS Steps -->
+      <div class="install-content active" id="ios-steps">
+        <div class="install-steps">
+          <div class="istep"><div class="istep-num">1</div><div class="istep-text">Open this page in <strong>Safari</strong> (not Chrome)</div></div>
+          <div class="istep"><div class="istep-num">2</div><div class="istep-text">Tap the <span class="share-icon">⬆</span> <strong>Share button</strong> — it's to the right of the address bar at the bottom</div></div>
+          <div class="istep"><div class="istep-num">3</div><div class="istep-text">Scroll down and tap <strong>"Add to Home Screen"</strong></div></div>
+          <div class="istep"><div class="istep-num">4</div><div class="istep-text">Tap <strong>"Add"</strong> in the top right — StockAI appears on your home screen ✅</div></div>
+        </div>
+        <div style="background:#0a0e14;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:12px;margin-bottom:16px;">
+          <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#64748b;margin-bottom:6px;">CAN'T FIND THE SHARE BUTTON?</div>
+          <div style="font-size:13px;color:#94a3b8;line-height:1.6;">Tap the <strong style="color:#e2e8f0">"aA"</strong> on the left of your address bar → tap <strong style="color:#e2e8f0">"Add to Home Screen"</strong></div>
+        </div>
+      </div>
+      <!-- Android Steps -->
+      <div class="install-content" id="android-steps">
+        <div class="install-steps">
+          <div class="istep"><div class="istep-num">1</div><div class="istep-text">Open this page in <strong>Chrome</strong></div></div>
+          <div class="istep"><div class="istep-num">2</div><div class="istep-text">Tap the <strong>⋮ three dots</strong> in the top right corner</div></div>
+          <div class="istep"><div class="istep-num">3</div><div class="istep-text">Tap <strong>"Add to Home screen"</strong> or <strong>"Install app"</strong></div></div>
+          <div class="istep"><div class="istep-num">4</div><div class="istep-text">Tap <strong>"Add"</strong> — StockAI appears on your home screen ✅</div></div>
+        </div>
+      </div>
+      <button id="install-close" onclick="closeInstall()">Got it — close</button>
+    </div>
+  </div>
 
   <!-- HEADER -->
   <div id="hdr">
@@ -240,6 +294,7 @@ canvas{width:100%!important;flex:1;display:block;}
       <div class="sub">Live · Accurate · Free</div>
     </div>
     <div class="dot"></div>
+    <button onclick="document.getElementById('install-modal').classList.remove('hidden')" style="background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);color:#93c5fd;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;padding:5px 10px;border-radius:8px;cursor:pointer;white-space:nowrap;margin-left:6px;">📲 Install</button>
   </div>
 
   <!-- TAB BAR (desktop) -->
@@ -615,6 +670,23 @@ setInterval(simTick,300);
 /* ═══════════════════════════════════════
    PWA — SERVICE WORKER + INSTALL
 ═══════════════════════════════════════ */
+function switchInstallTab(tab) {
+  document.querySelectorAll('.itab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.install-content').forEach(t => t.classList.remove('active'));
+  document.getElementById(tab + '-steps').classList.add('active');
+  event.target.classList.add('active');
+}
+function closeInstall() {
+  document.getElementById('install-modal').classList.add('hidden');
+}
+// Show install modal on first visit
+if (!localStorage.getItem('stockai-installed')) {
+  setTimeout(() => {
+    document.getElementById('install-modal').classList.remove('hidden');
+    localStorage.setItem('stockai-installed', '1');
+  }, 1500);
+}
+
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
     navigator.serviceWorker.register('/sw.js').catch(()=>{});
